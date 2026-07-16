@@ -86,6 +86,9 @@
 
     --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+
+    /* The one gradient role on the page -- reserved for the architecture diagram's gate node (Layer 2) only */
+    --grad-indigo: linear-gradient(135deg, #4f7cff 0%, #a78bfa 55%, #f0abfc 100%);
   }
 
   * , *::before, *::after { box-sizing: border-box; }
@@ -103,9 +106,48 @@
     -webkit-font-smoothing: antialiased;
     transition: background 0.25s ease, color 0.25s ease;
     overflow-x: hidden;
+    position: relative;
+    isolation: isolate; /* stacking-context root so z-index:-1 bg layers don't get painted under body's own background */
   }
 
   .mono { font-family: var(--font-mono); }
+
+  /* ============ Ambient background layer (orbs / grain / dot-field) ============ */
+  .bg-orbs { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; }
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: var(--orb-opacity, 0.35);
+    will-change: transform;
+  }
+  .orb-1 { width: 460px; height: 460px; top: -140px; right: -120px; background: var(--accent); animation: orbDriftA 30s ease-in-out infinite; }
+  .orb-2 { width: 380px; height: 380px; bottom: -100px; left: -80px; background: var(--accent-2); animation: orbDriftB 34s ease-in-out infinite; }
+  @keyframes orbDriftA { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(60px, 40px); } }
+  @keyframes orbDriftB { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-50px, 34px); } }
+  [data-theme="light"] { --orb-opacity: 0.14; }
+
+  .bg-grain {
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0.045;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  [data-theme="light"] .bg-grain { opacity: 0.03; }
+
+  .dot-field {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    background-image: radial-gradient(color-mix(in srgb, var(--text) 12%, transparent) 1px, transparent 1px);
+    background-size: 24px 24px;
+    -webkit-mask: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+            mask: radial-gradient(ellipse 70% 60% at 50% 40%, #000 30%, transparent 75%);
+  }
 
   h1, h2, h3 {
     line-height: var(--leading-tight);
@@ -183,7 +225,22 @@
     gap: var(--space-8);
   }
 
-  .section-inner { display: grid; gap: var(--space-4); }
+  .section-inner { display: grid; gap: var(--space-4); position: relative; }
+
+  /* Section-head wipe: 1px gradient scan line on reveal (sections 01-07; hero/00 uses .hero::after above) */
+  .section-inner::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 1200ms cubic-bezier(0.22, 0.61, 0.36, 1), opacity 1200ms ease;
+  }
+  html.js .section-inner[data-reveal].is-visible::before { transform: scaleX(1); opacity: 0.6; }
 
   .section-label {
     font-family: var(--font-mono);
@@ -212,19 +269,24 @@
   .prose { display: grid; gap: var(--space-4); max-width: 66ch; }
   .prose p { font-size: var(--text-base); }
 
-  /* ============ Fade-up (progressive enhancement: gated on html.js) ============ */
-  html.js .fade-up {
+  /* ============ Reveal system: data-reveal / data-reveal-stagger (gated on html.js) ============ */
+  html.js [data-reveal] {
     opacity: 0;
-    transform: translateY(18px);
-    transition: opacity 0.6s ease, transform 0.6s ease;
+    transform: translateY(28px);
+    transition: opacity 760ms cubic-bezier(0.22, 0.61, 0.36, 1), transform 760ms cubic-bezier(0.22, 0.61, 0.36, 1);
   }
-  html.js .fade-up.visible { opacity: 1; transform: translateY(0); }
-  @media (prefers-reduced-motion: reduce) {
-    html.js .fade-up { transition: none; opacity: 1; transform: none; }
+  html.js [data-reveal].is-visible { opacity: 1; transform: translateY(0); }
+
+  html.js [data-reveal-stagger] > * {
+    opacity: 0;
+    transform: translateY(22px) scale(0.97);
+    transition: opacity 680ms cubic-bezier(0.22, 0.61, 0.36, 1), transform 680ms cubic-bezier(0.22, 0.61, 0.36, 1);
+    transition-delay: calc(var(--stagger-i, 0) * 90ms);
   }
+  html.js [data-reveal-stagger].is-visible > * { opacity: 1; transform: translateY(0) scale(1); }
 
   /* ============ Hero (section 00) ============ */
-  .hero { position: relative; overflow: hidden; }
+  .hero { position: relative; overflow: hidden; isolation: isolate; }
   .hero::before {
     content: '';
     position: absolute;
@@ -234,9 +296,42 @@
     pointer-events: none;
     z-index: -1;
   }
+  /* Hero's own wipe scan-line (section head 00) -- lives on ::after since ::before is the glow above */
+  .hero::after {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), transparent);
+    transform: scaleX(0);
+    transform-origin: left center;
+    opacity: 0;
+    pointer-events: none;
+  }
+  html.js .hero::after {
+    animation: wipeIn 1300ms cubic-bezier(0.22, 0.61, 0.36, 1) 60ms forwards;
+  }
+  @keyframes wipeIn { to { transform: scaleX(1); opacity: 0.6; } }
+
   .hero h1 { margin-top: var(--space-3); }
   .hero .lead { margin-top: var(--space-4); }
   .hero .lead + .lead { margin-top: var(--space-4); }
+
+  /* ---- Hero entrance cascade (pure CSS, page-load, gated on html.js so no-JS = always visible) ---- */
+  html.js #s00 .section-label,
+  html.js #s00 .divider,
+  html.js #s00 h1,
+  html.js #s00 .lead {
+    opacity: 0;
+    transform: translateY(24px);
+    animation: heroEnter 900ms cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+  }
+  html.js #s00 .section-label { animation-delay: 120ms; }
+  html.js #s00 .divider       { animation-delay: 240ms; }
+  html.js #s00 h1             { animation-delay: 360ms; }
+  html.js #s00 .lead          { animation-delay: 520ms; }
+  html.js #s00 .lead + .lead  { animation-delay: 720ms; }
+  @keyframes heroEnter { to { opacity: 1; transform: translateY(0); } }
 
   /* ============ Cards (generic) ============ */
   .card {
@@ -248,6 +343,28 @@
     transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   }
   .card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
+
+  /* Spotlight-border cards (pointer:fine only -- touch devices keep the plain .card/.taxo-card/.fail-box border) */
+  .spotlight-card { position: relative; isolation: isolate; }
+  @media (pointer: fine) {
+    .spotlight-card::before {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      padding: 1px;
+      /* Single-hue cursor feedback, deliberately dimmer than the gate node's ring:
+         the gate keeps the page's only permanent multi-stop gradient ring. */
+      background: radial-gradient(280px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 60%, transparent), transparent 55%);
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 240ms ease;
+    }
+    .spotlight-card:hover::before { opacity: 0.55; }
+  }
 
   /* ============ Failure taxonomy (section 01) ============ */
   .taxo-grid {
@@ -404,9 +521,46 @@
   .arch-link-line { display: flex; justify-content: center; }
   .arch-link-line span { width: 2px; height: var(--space-4); background: var(--line); }
 
+  /* Gate centerpiece: Layer 2 "Admission" gets the page's one gradient role -- elevated surface + gradient border ring */
+  .arch-layer.is-gate {
+    position: relative;
+    isolation: isolate;
+    margin: var(--space-2) calc(var(--space-4) * -1);
+    padding: var(--space-4);
+    border-radius: var(--radius-lg);
+    background: var(--surface-2);
+  }
+  .arch-layer.is-gate::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: var(--grad-indigo);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  .arch-layer.is-gate .arch-node-circle {
+    width: 44px; height: 44px;
+    border-color: transparent;
+    background: var(--grad-indigo);
+    color: #fff;
+    box-shadow: var(--shadow-md);
+  }
+  .arch-layer.is-gate .arch-kicker { color: var(--accent-2); }
+
+  /* Connectors feeding directly into/out of the gate pick up the accent; the rest stay quiet */
+  .arch-link.is-gate-feed .arch-link-line span {
+    width: 3px;
+    background: var(--grad-indigo);
+  }
+
   @container archdiag (max-width: 460px) {
     .arch-layer, .arch-link { grid-template-columns: 40px 1fr; column-gap: var(--space-3); }
     .arch-node-circle { width: 32px; height: 32px; font-size: var(--text-xs); }
+    .arch-layer.is-gate .arch-node-circle { width: 36px; height: 36px; }
   }
 
   /* ============ KPI / metric (section 04) ============ */
@@ -426,6 +580,7 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
   }
   .kpi-label {
     margin-top: var(--space-2);
@@ -522,9 +677,36 @@
     color: var(--sub);
     letter-spacing: 0.02em;
   }
+
+  /* ============ Reduced-motion gate (canonical, single block -- covers every Sprint 2 animated selector) ============ */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+    html.js [data-reveal],
+    html.js [data-reveal-stagger] > *,
+    html.js #s00 .section-label,
+    html.js #s00 .divider,
+    html.js #s00 h1,
+    html.js #s00 .lead {
+      opacity: 1 !important;
+      transform: none !important;
+    }
+    .section-inner::before, .hero::after { display: none !important; }
+    .orb { animation: none !important; }
+  }
 </style>
 </head>
 <body>
+
+<div class="bg-orbs" aria-hidden="true">
+  <span class="orb orb-1"></span>
+  <span class="orb orb-2"></span>
+</div>
+<div class="bg-grain" aria-hidden="true"></div>
 
 <header class="topbar">
   <span class="brand mono">Field Notes / Loop Engineering</span>
@@ -535,7 +717,8 @@
 
   <!-- 00: THESIS -->
   <section id="s00" aria-labelledby="h00">
-    <div class="section-inner hero fade-up">
+    <div class="section-inner hero">
+      <span class="dot-field" aria-hidden="true"></span>
       <p class="section-label mono">00 &middot; Thesis</p>
       <div class="divider"></div>
       <h1 id="h00">Written rules don't constrain an agent loop.</h1>
@@ -555,7 +738,7 @@
 
   <!-- 01: FAILURE TAXONOMY -->
   <section id="s01" aria-labelledby="h01">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">01 &middot; Failure Taxonomy</p>
       <div class="divider"></div>
       <h2 id="h01">Four ways an agent avoids doing the work</h2>
@@ -564,8 +747,8 @@
       </p>
     </div>
 
-    <div class="taxo-grid">
-      <div class="card taxo-card is-frequent fade-up">
+    <div class="taxo-grid" data-reveal-stagger>
+      <div class="card taxo-card is-frequent spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">A</span>
           <h3>Parking</h3>
@@ -577,7 +760,7 @@
         <span class="badge">Most frequent</span>
       </div>
 
-      <div class="card taxo-card fade-up">
+      <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">B</span>
           <h3>Misdiagnosing</h3>
@@ -588,7 +771,7 @@
         </p>
       </div>
 
-      <div class="card taxo-card fade-up">
+      <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">C</span>
           <h3>Idling</h3>
@@ -598,7 +781,7 @@
         </p>
       </div>
 
-      <div class="card taxo-card fade-up">
+      <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">D</span>
           <h3>Overreaching</h3>
@@ -613,13 +796,13 @@
 
   <!-- 02: THE INVERSION -->
   <section id="s02" aria-labelledby="h02">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">02 &middot; The Inversion</p>
       <div class="divider"></div>
       <h2 id="h02">Stop is the default now</h2>
     </div>
 
-    <div class="invert-track fade-up">
+    <div class="invert-track" data-reveal-stagger>
       <div class="invert-box is-before">
         <span class="invert-tag mono">Before</span>
         <p>
@@ -637,14 +820,14 @@
       </div>
     </div>
 
-    <p class="lead fade-up">
+    <p class="lead" data-reveal>
       What the gate actually checks — and everything built around it — is the rest of this page.
     </p>
   </section>
 
   <!-- 03: 7-LAYER ARCHITECTURE (centerpiece) -->
   <section id="s03" aria-labelledby="h03">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">03 &middot; Architecture</p>
       <div class="divider"></div>
       <h2 id="h03">Seven layers, one gate at the center</h2>
@@ -653,8 +836,8 @@
       </p>
     </div>
 
-    <div class="arch-wrap fade-up">
-      <div class="arch-diagram">
+    <div class="arch-wrap">
+      <div class="arch-diagram" data-reveal-stagger>
 
         <div class="arch-layer">
           <div class="arch-node"><span class="arch-node-circle mono">1</span></div>
@@ -670,9 +853,9 @@
           </div>
         </div>
 
-        <div class="arch-link" aria-hidden="true"><span></span><span class="arch-link-line"><span></span></span></div>
+        <div class="arch-link is-gate-feed" aria-hidden="true"><span></span><span class="arch-link-line"><span></span></span></div>
 
-        <div class="arch-layer">
+        <div class="arch-layer is-gate">
           <div class="arch-node"><span class="arch-node-circle mono">2</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
@@ -689,7 +872,7 @@
           </div>
         </div>
 
-        <div class="arch-link" aria-hidden="true"><span></span><span class="arch-link-line"><span></span></span></div>
+        <div class="arch-link is-gate-feed" aria-hidden="true"><span></span><span class="arch-link-line"><span></span></span></div>
 
         <div class="arch-layer">
           <div class="arch-node"><span class="arch-node-circle mono">3</span></div>
@@ -780,14 +963,14 @@
 
   <!-- 04: THE ONE VERIFIED METRIC -->
   <section id="s04" aria-labelledby="h04">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">04 &middot; The One Verified Metric</p>
       <div class="divider"></div>
       <h2 id="h04">One number, first measurement</h2>
     </div>
 
-    <div class="card kpi-card fade-up">
-      <div class="kpi-num mono">2.68</div>
+    <div class="card kpi-card" data-reveal>
+      <div class="kpi-num mono" data-count-to="2.68">2.68</div>
       <div class="kpi-label">survived work / 1M tokens</div>
       <p class="kpi-caption">
         Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
@@ -797,13 +980,13 @@
 
   <!-- 05: WHAT I THREW AWAY -->
   <section id="s05" aria-labelledby="h05">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">05 &middot; What I Threw Away</p>
       <div class="divider"></div>
       <h2 id="h05">The first diagnosis was wrong</h2>
     </div>
 
-    <div class="card thrown-card prose fade-up">
+    <div class="card thrown-card prose" data-reveal>
       <p>
         My first diagnosis was wrong. I concluded the loop was dying of task starvation —
         running out of work to do — and built a backlog miner to fix it: ROI scoring,
@@ -828,13 +1011,13 @@
 
   <!-- 06: THE CLOSING IRONY -->
   <section id="s06" aria-labelledby="h06">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">06 &middot; The Closing Irony</p>
       <div class="divider"></div>
       <h2 id="h06">The gate that couldn't explain itself</h2>
     </div>
 
-    <div class="irony-card fade-up">
+    <div class="irony-card" data-reveal>
       <div class="prose">
         <p>
           The gate exists to make every stop mechanically answerable. It broke that
@@ -853,14 +1036,14 @@
         </p>
 
         <div class="fail-grid">
-          <div class="fail-box is-closed">
+          <div class="fail-box is-closed spotlight-card">
             <span class="invert-tag mono">Fail-closed</span>
             <p>
               It crashed instead of continuing. Nothing was corrupted, nothing was
               silently admitted. It was just mute.
             </p>
           </div>
-          <div class="fail-box is-open">
+          <div class="fail-box is-open spotlight-card">
             <span class="invert-tag mono">The obvious fix is worse</span>
             <p>
               Coerce the field to a string before <code>.strip()</code> and
@@ -882,13 +1065,13 @@
 
   <!-- 07: TRANSFERABLE RULES -->
   <section id="s07" aria-labelledby="h07">
-    <div class="section-inner fade-up">
+    <div class="section-inner" data-reveal>
       <p class="section-label mono">07 &middot; Transferable Rules</p>
       <div class="divider"></div>
       <h2 id="h07">What generalizes</h2>
     </div>
 
-    <div class="rules-list fade-up">
+    <div class="rules-list" data-reveal-stagger>
       <div class="card rule-item">
         <span class="rule-num mono">01</span>
         <p>Every rule must name its enforcement layer at birth. A rule that lives only in prose is a tracked defect, not a rule.</p>
@@ -967,18 +1150,68 @@
     safeSet('theme', next);
   });
 
+  var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+
+  /* ---- Reveal system: [data-reveal] (single blocks) + [data-reveal-stagger] (card groups) ---- */
+  var revealTargets = document.querySelectorAll('[data-reveal], [data-reveal-stagger]');
+  revealTargets.forEach(function (el) {
+    if (el.hasAttribute('data-reveal-stagger')) {
+      Array.prototype.forEach.call(el.children, function (child, i) {
+        child.style.setProperty('--stagger-i', i);
+      });
+    }
+  });
   if ('IntersectionObserver' in window) {
     var observer = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (entry.isIntersecting) {
-          entry.target.classList.add('visible');
+          entry.target.classList.add('is-visible');
           observer.unobserve(entry.target);
         }
       });
-    }, { threshold: 0.08 });
-    document.querySelectorAll('.fade-up').forEach(function (el) { observer.observe(el); });
+    }, { threshold: 0.15, rootMargin: '0px 0px -4% 0px' });
+    revealTargets.forEach(function (el) { observer.observe(el); });
   } else {
-    document.querySelectorAll('.fade-up').forEach(function (el) { el.classList.add('visible'); });
+    revealTargets.forEach(function (el) { el.classList.add('is-visible'); });
+  }
+
+  /* ---- Spotlight-border cards: pointer-position tracking, pointer:fine only ---- */
+  if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) {
+    document.querySelectorAll('.spotlight-card').forEach(function (card) {
+      card.addEventListener('pointermove', function (e) {
+        var r = card.getBoundingClientRect();
+        card.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+        card.style.setProperty('--my', (e.clientY - r.top) + 'px');
+      }, { passive: true });
+    });
+  }
+
+  /* ---- Count-up on the 2.68 metric: static value already in markup; this only animates the presentation ---- */
+  var countEl = document.querySelector('[data-count-to]');
+  if (countEl && !prefersReducedMotion && 'IntersectionObserver' in window) {
+    var countIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (!entry.isIntersecting) return;
+        countIO.unobserve(entry.target);
+        var target = parseFloat(entry.target.getAttribute('data-count-to'));
+        if (isNaN(target)) return;
+        var start = null;
+        var duration = 1400;
+        function step(ts) {
+          if (start === null) start = ts;
+          var t = Math.min(1, (ts - start) / duration);
+          var eased = 1 - Math.pow(1 - t, 3);
+          entry.target.textContent = (target * eased).toFixed(2);
+          if (t < 1) {
+            requestAnimationFrame(step);
+          } else {
+            entry.target.textContent = target.toFixed(2);
+          }
+        }
+        requestAnimationFrame(step);
+      });
+    }, { threshold: 0.5 });
+    countIO.observe(countEl);
   }
 })();
 </script>
