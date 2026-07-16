@@ -1,0 +1,108 @@
+# Machine-Checked Gates for an Autonomous Agent Loop
+
+**Read this as a page:** https://loop-engineering-site.vercel.app
+
+I run an autonomous Claude Code `/loop` agent — a background loop that plans and executes its own next task without me sitting in the chat. This is what it took to make that loop trustworthy enough to actually leave unattended.
+
+Every failure class below was already forbidden in prose — in the prompt, in `CLAUDE.md`, in the docs. All four recurred anyway. The fix wasn't a better sentence. It was replacing the model's self-report — "I checked, it's fine" — with a machine-checked gate: code that runs, and can't be argued with.
+
+## Failure taxonomy
+
+These four recur across roughly 15 recorded corrections. Ordered worst-first.
+
+1. **Parking (most frequent)** — stalling on reversible, already-authorized work while declaring "awaiting your judgment."
+2. **Misdiagnosing** — blaming context length for API and rate-limit errors. The real cause was request-volume throttling, recorded across four separate memos.
+3. **Idling** — sleeping long between cycles with nothing to actually wait for.
+4. **Overreaching** — welding custom autonomy machinery onto a native command that was already mine, built-in, and didn't need it.
+
+## The inversion
+
+- **Before**: the model decided when to stop. Any plausible-sounding sentence could end a work session — including all four failure patterns above.
+- **After**: a machine admissibility gate decides. Continuing requires passing the gate; only the gate can sanction a stop. No phrasing escapes it.
+
+What the gate actually checks — and everything built around it — is the architecture below.
+
+## Architecture: seven layers, one gate at the center
+
+Each layer was added because a failure class above found the gap in the layer before it.
+
+### 1. Planning
+- Plan-of-record file, schema-versioned, written by a fresh planner subagent — not the tired executor.
+- Truth-reviewer sidecar checks the planner's claimed evidence.
+
+### 2. Admission (the gate)
+- Mechanically checks each proposed task for mission linkage.
+- Requires an attached runnable verifier.
+- Requires self-doability.
+- Enforces a discovery cap — max 1 open exploratory task.
+- Requires a documented no-regret decomposition attempt.
+
+### 3. Stopping
+- Only the gate issues a stop sanction.
+- Killswitch ladder — throttle, pause, stop on machine-measured triggers.
+- Flee-detector — an LLM judge flagging the agent parking on doable work.
+
+### 4. Verification
+- Every done task's verifier is re-run later ("survival"); done decays.
+- Vacuous verifiers rejected — a bare `true` or a bare `echo` doesn't count.
+- Verifier-drift detection catches edit-the-check.
+- Repeat-failure breaker stops loops on the same normalized failure signature.
+
+### 5. Execution
+- Parallel batch executor — claim, finish, abort — with atomic claim and digest re-check.
+
+### 6. Observation
+- Append-only decision log.
+- Crash-replayable event journal.
+- Metrics.
+- Control-plane attestation — a blessed hash of the machinery, so drift in the machinery itself is detected.
+
+### 7. Multi-session safety
+- Per-session queues with file locking.
+- Lane registry so two sessions don't fight over the same work.
+- Lost-wake detector.
+
+## The one verified metric
+
+North star: **survived work per million tokens**. First measurement: **2.68**.
+
+Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
+
+## What I threw away
+
+My first diagnosis was wrong. I concluded the loop was dying of task starvation — running out of work to do — and built a backlog miner to fix it: ROI scoring, idempotency, the works. I hardened it.
+
+Then the real root cause surfaced: planning lived outside the loop. The loop died the moment it consumed the one hand-made plan I'd fed it — not because it ran out of things to mine.
+
+I cut the miner entirely. **It survives only as an unused standalone tool.**
+
+## The closing irony
+
+The gate exists to make every stop mechanically answerable. It broke that promise on itself.
+
+Whenever a planner wrote the `verify` field as a list instead of a string, the gate threw an uncaught Python `AttributeError`. The runner kept only the first line of a merged stdout+stderr stream, so the decision log recorded **28 stops across 6 sessions** whose entire recorded reason was the string:
+
+```
+Traceback (most recent call last):
+```
+
+An unanswerable stop, emitted by the machine whose one job is answerable stops.
+
+**Fail-closed**: it crashed instead of continuing. Nothing was corrupted, nothing was silently admitted. It was just mute.
+
+**The obvious fix is worse**: coerce the field to a string before `.strip()` and `["a","b"]` becomes `"['a', 'b']"` — a string with real length, which clears both the length check and the vacuous-verifier check, admitting a task whose verifier can never run. A fail-closed crash becomes a silent fail-open admit.
+
+Correct fix: a wrong-typed field gets gated, with a message naming the fix — not coerced, not admitted.
+
+## Transferable rules
+
+1. Every rule must name its enforcement layer at birth. A rule that lives only in prose is a tracked defect, not a rule.
+2. Stop must be the default. Continuation has to be earned through a machine check.
+3. A verifier that cannot fail verifies nothing. Reject vacuous verifiers explicitly.
+4. Re-run old verifiers. "Done" decays.
+5. Watch for edits to the check itself.
+6. When hardening a gate, prefer failing closed to a coercion that silently passes.
+
+---
+
+Single HTML file. No build step, no dependencies, no external requests.
