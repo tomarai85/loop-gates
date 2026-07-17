@@ -237,6 +237,10 @@
     overflow-wrap: normal;
     line-break: strict;
   }
+  /* Katakana loanwords stay whole (ループ must not split to ルー/プ). keep-all can't do
+     this without overflowing long JP runs, so only the katakana runs are protected;
+     kanji/hiragana still wrap naturally. Applied programmatically to .lang-ja text. */
+  .nb { white-space: nowrap; }
   h1.lang-ja, h2.lang-ja, h3.lang-ja, p.lang-ja, .lead.lang-ja, li.lang-ja {
     max-width: 32em;
   }
@@ -746,17 +750,17 @@
     <div class="section-inner hero">
       <span class="dot-field" aria-hidden="true"></span>
       <p class="section-label mono lang-en">00 &middot; Thesis</p>
-      <p class="section-label mono lang-ja" lang="ja">00 &middot; テーゼ</p>
+      <p class="section-label mono lang-ja" lang="ja">00 &middot; <span class="nb">テーゼ</span></p>
       <div class="divider"></div>
       <h1 id="h00-en" class="lang-en">Written rules don't constrain an agent loop.</h1>
-      <h1 id="h00-ja" class="lang-ja" lang="ja">文章で書いたルールでは、エージェントのループは縛れない。</h1>
+      <h1 id="h00-ja" class="lang-ja" lang="ja">文章で書いた<span class="nb">ルール</span>では、<span class="nb">エージェント</span>の<span class="nb">ループ</span>は縛れない。</h1>
       <p class="lead lang-en">
         I run an autonomous Claude Code <code>/loop</code> agent — a background loop that plans and
         executes its own next task without me sitting in the chat. This is what it took to make that
         loop trustworthy enough to actually leave unattended.
       </p>
       <p class="lead lang-ja" lang="ja">
-        Claude Code の <code>/loop</code> を無人で走らせています。次にやることを自分で決めて実行しつづける、バックグラウンドで動くループです。それを、席を外しても任せられるほど信頼できるものにするまでの記録です。
+        Claude Code の <code>/loop</code> を無人で走らせています。次にやることを自分で決めて実行しつづける、<span class="nb">バックグラウンド</span>で動く<span class="nb">ループ</span>です。それを、席を外しても任せられるほど信頼できるものにするまでの記録です。
       </p>
       <p class="lead lead-2 lang-en">
         Every failure class below was already forbidden in prose — in the prompt, in <code>CLAUDE.md</code>,
@@ -765,7 +769,7 @@
         and can't be argued with.
       </p>
       <p class="lead lead-2 lang-ja" lang="ja">
-        下に並べた失敗は、どれもプロンプトや <code>CLAUDE.md</code> に「やるな」と書いてありました。それでも4つとも再発しました。効いたのは、うまい一文ではありません。モデルの自己申告——「確認しました、大丈夫です」——を、機械のゲート、つまり実際に走って、言い訳のきかないコードに置き換えることでした。
+        下に並べた失敗は、どれも<span class="nb">プロンプト</span>や <code>CLAUDE.md</code> に「やるな」と書いてありました。それでも4つとも再発しました。効いたのは、うまい一文ではありません。<span class="nb">モデル</span>の自己申告——「確認しました、大丈夫です」——を、機械の<span class="nb">ゲート</span>、つまり実際に走って、言い訳のきかない<span class="nb">コード</span>に置き換えることでした。
       </p>
     </div>
   </section>
@@ -777,7 +781,7 @@
       <p class="section-label mono lang-ja" lang="ja">01 &middot; 失敗の分類</p>
       <div class="divider"></div>
       <h2 id="h01-en" class="lang-en">Four ways an agent avoids doing the work</h2>
-      <h2 id="h01-ja" class="lang-ja" lang="ja">エージェントが仕事から逃げる4つの型</h2>
+      <h2 id="h01-ja" class="lang-ja" lang="ja"><span class="nb">エージェント</span>が仕事から逃げる4つの型</h2>
       <p class="lead lang-en">
         These four recur across roughly 15 recorded corrections. Ordered worst-first.
       </p>
@@ -815,7 +819,7 @@
           request-volume throttling — recorded across four separate memos.
         </p>
         <p class="lang-ja" lang="ja">
-          API やレート制限のエラーを、コンテキストの長さのせいにする。本当の原因は、リクエスト量が多いことによるサーバー側の制限でした。同じ誤診が、別々のメモに4回残っています。
+          API や<span class="nb">レート</span>制限の<span class="nb">エラー</span>を、<span class="nb">コンテキスト</span>の長さのせいにする。本当の原因は、<span class="nb">リクエスト</span>量が多いことによる<span class="nb">サーバー</span>側の制限でした。同じ誤診が、別々の<span class="nb">メモ</span>に4回残っています。
         </p>
       </div>
 
@@ -829,7 +833,7 @@
           Sleeping long between cycles with nothing to actually wait for.
         </p>
         <p class="lang-ja" lang="ja">
-          待つものが何もないのに、サイクルの合間に長く眠る。
+          待つものが何もないのに、<span class="nb">サイクル</span>の合間に長く眠る。
         </p>
       </div>
 
@@ -844,7 +848,7 @@
           mine, built-in, and didn't need it.
         </p>
         <p class="lang-ja" lang="ja">
-          もともと自分が管理していて、すでに組み込み済みで、手を入れる必要もないコマンドに、自作の仕組みを無理やりくっつける。
+          もともと自分が管理していて、すでに組み込み済みで、手を入れる必要もない<span class="nb">コマンド</span>に、自作の仕組みを無理やりくっつける。
         </p>
       </div>
     </div>
@@ -869,7 +873,7 @@
           a work session — including all four failure patterns above.
         </p>
         <p class="lang-ja" lang="ja">
-          モデルが、いつ止まるかを決めていた。それらしい一文があれば、いつでも作業を終われた——上の4つの失敗も含めて。
+          <span class="nb">モデル</span>が、いつ止まるかを決めていた。それらしい一文があれば、いつでも作業を終われた——上の4つの失敗も含めて。
         </p>
       </div>
       <div class="invert-arrow" aria-hidden="true">&rarr;</div>
@@ -881,7 +885,7 @@
           gate; only the gate can sanction a stop. No phrasing escapes it.
         </p>
         <p class="lang-ja" lang="ja">
-          機械の入場ゲートが判断する。続けるにはゲートを通る必要があり、止めてよいと認めるのもゲートだけ。どんな言い回しも、ここは抜けられません。
+          機械の入場<span class="nb">ゲート</span>が判断する。続けるには<span class="nb">ゲート</span>を通る必要があり、止めてよいと認めるのも<span class="nb">ゲート</span>だけ。どんな言い回しも、ここは抜けられません。
         </p>
       </div>
     </div>
@@ -891,7 +895,7 @@
         What the gate actually checks — and everything built around it — is the rest of this page.
       </p>
       <p class="lead lang-ja" lang="ja">
-        ゲートが実際に何をチェックし、その周りに何を積んだか——それを、この先で見ていきます。
+        <span class="nb">ゲート</span>が実際に何を<span class="nb">チェック</span>し、その周りに何を積んだか——それを、この先で見ていきます。
       </p>
     </div>
   </section>
@@ -900,10 +904,10 @@
   <section id="s03" aria-labelledby="h03-en">
     <div class="section-inner" data-reveal>
       <p class="section-label mono lang-en">03 &middot; Architecture</p>
-      <p class="section-label mono lang-ja" lang="ja">03 &middot; アーキテクチャ</p>
+      <p class="section-label mono lang-ja" lang="ja">03 &middot; <span class="nb">アーキテクチャ</span></p>
       <div class="divider"></div>
       <h2 id="h03-en" class="lang-en">Seven layers, one gate at the center</h2>
-      <h2 id="h03-ja" class="lang-ja" lang="ja">7層、中心にゲートが1つ</h2>
+      <h2 id="h03-ja" class="lang-ja" lang="ja">7層、中心に<span class="nb">ゲート</span>が1つ</h2>
       <p class="lead lang-en">
         Each layer was added because a failure class above found the gap in the layer before it.
       </p>
@@ -926,9 +930,9 @@
             </div>
             <ul class="arch-mechs">
               <li class="lang-en"><strong>Plan-of-record file</strong>, schema-versioned, written by a fresh planner subagent — not the tired executor.</li>
-              <li class="lang-ja" lang="ja"><strong>計画の正本ファイル</strong>。スキーマにバージョンを持ち、疲れた実行役ではなく、新しい計画役サブエージェントが書く。</li>
+              <li class="lang-ja" lang="ja"><strong>計画の正本<span class="nb">ファイル</span></strong>。<span class="nb">スキーマ</span>に<span class="nb">バージョン</span>を持ち、疲れた実行役ではなく、新しい計画役<span class="nb">サブエージェント</span>が書く。</li>
               <li class="lang-en"><strong>Truth-reviewer sidecar</strong> checks the planner's claimed evidence.</li>
-              <li class="lang-ja" lang="ja"><strong>真偽レビューのサイドカー</strong>が、計画役の挙げた根拠を照合する。</li>
+              <li class="lang-ja" lang="ja"><strong>真偽<span class="nb">レビュー</span>の<span class="nb">サイドカー</span></strong>が、計画役の挙げた根拠を照合する。</li>
             </ul>
           </div>
         </div>
@@ -942,17 +946,17 @@
               <span class="arch-kicker mono lang-en">Layer 2</span>
               <span class="arch-kicker mono lang-ja" lang="ja">層2</span>
               <span class="arch-name lang-en">Admission (the gate)</span>
-              <span class="arch-name lang-ja" lang="ja">入場（ゲート）</span>
+              <span class="arch-name lang-ja" lang="ja">入場（<span class="nb">ゲート</span>）</span>
             </div>
             <ul class="arch-mechs">
               <li class="lang-en">Mechanically checks each proposed task for <strong>mission linkage</strong>.</li>
-              <li class="lang-ja" lang="ja">提案された各タスクが、<strong>ミッションにつながっているか</strong>を機械が確認する。</li>
+              <li class="lang-ja" lang="ja">提案された各<span class="nb">タスク</span>が、<strong><span class="nb">ミッション</span>につながっているか</strong>を機械が確認する。</li>
               <li class="lang-en">Requires an attached <strong>runnable verifier</strong>.</li>
-              <li class="lang-ja" lang="ja"><strong>走らせられる検証コマンド</strong>が付いていることを要求する。</li>
+              <li class="lang-ja" lang="ja"><strong>走らせられる検証<span class="nb">コマンド</span></strong>が付いていることを要求する。</li>
               <li class="lang-en">Requires <strong>self-doability</strong>.</li>
               <li class="lang-ja" lang="ja"><strong>自分の手で完結できる</strong>ことを要求する。</li>
               <li class="lang-en">Enforces a <strong>discovery cap</strong> — max 1 open exploratory task.</li>
-              <li class="lang-ja" lang="ja"><strong>探索の上限</strong>を課す——同時に開いていい探索タスクは1つまで。</li>
+              <li class="lang-ja" lang="ja"><strong>探索の上限</strong>を課す——同時に開いていい探索<span class="nb">タスク</span>は1つまで。</li>
               <li class="lang-en">Requires a documented <strong>no-regret decomposition attempt</strong>.</li>
               <li class="lang-ja" lang="ja">「<strong>後悔しない分解</strong>」を試した記録を要求する。</li>
             </ul>
@@ -972,9 +976,9 @@
             </div>
             <ul class="arch-mechs">
               <li class="lang-en">Only the gate issues a <strong>stop sanction</strong>.</li>
-              <li class="lang-ja" lang="ja"><strong>停止を認める</strong>のはゲートだけ。</li>
+              <li class="lang-ja" lang="ja"><strong>停止を認める</strong>のは<span class="nb">ゲート</span>だけ。</li>
               <li class="lang-en"><strong>Killswitch ladder</strong> — throttle, pause, stop on machine-measured triggers.</li>
-              <li class="lang-ja" lang="ja"><strong>キルスイッチの段階</strong>——機械が測った引き金で、絞る・止める・落とす。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">キルスイッチ</span>の段階</strong>——機械が測った引き金で、絞る・止める・落とす。</li>
               <li class="lang-en"><strong>Flee-detector</strong> — an LLM judge flagging the agent parking on doable work.</li>
               <li class="lang-ja" lang="ja"><strong>逃げ検出</strong>——対応できる仕事の前で手を止めていないか、LLM の判定役が見張る。</li>
             </ul>
@@ -994,13 +998,13 @@
             </div>
             <ul class="arch-mechs">
               <li class="lang-en">Every done task's verifier is <strong>re-run later</strong> ("survival"); done decays.</li>
-              <li class="lang-ja" lang="ja">完了したタスクの検証コマンドは、<strong>後でもう一度走らせる</strong>（「生存確認」）。完了は腐る。</li>
+              <li class="lang-ja" lang="ja">完了した<span class="nb">タスク</span>の検証<span class="nb">コマンド</span>は、<strong>後でもう一度走らせる</strong>（「生存確認」）。完了は腐る。</li>
               <li class="lang-en"><strong>Vacuous verifiers</strong> rejected — a bare <code>true</code> or a bare <code>echo</code> doesn't count.</li>
               <li class="lang-ja" lang="ja"><strong>空の検証は却下</strong>——ただの <code>true</code> や中身のない <code>echo</code> は認めない。</li>
               <li class="lang-en"><strong>Verifier-drift detection</strong> catches edit-the-check.</li>
-              <li class="lang-ja" lang="ja"><strong>検証ドリフト検出</strong>が、検査そのものの書き換えを捕まえる。</li>
+              <li class="lang-ja" lang="ja"><strong>検証<span class="nb">ドリフト</span>検出</strong>が、検査そのものの書き換えを捕まえる。</li>
               <li class="lang-en"><strong>Repeat-failure breaker</strong> stops loops on the same normalized failure signature.</li>
-              <li class="lang-ja" lang="ja">同じ失敗の反復を、<strong>正規化した署名</strong>で見て、ループを止める。</li>
+              <li class="lang-ja" lang="ja">同じ失敗の反復を、<strong>正規化した署名</strong>で見て、<span class="nb">ループ</span>を止める。</li>
             </ul>
           </div>
         </div>
@@ -1018,7 +1022,7 @@
             </div>
             <ul class="arch-mechs">
               <li class="lang-en"><strong>Parallel batch executor</strong> — claim, finish, abort — with atomic claim and digest re-check.</li>
-              <li class="lang-ja" lang="ja"><strong>並列バッチ実行</strong>——確保・完了・中止を、アトミックな確保とダイジェスト再照合つきで。</li>
+              <li class="lang-ja" lang="ja"><strong>並列<span class="nb">バッチ</span>実行</strong>——確保・完了・中止を、<span class="nb">アトミック</span>な確保と<span class="nb">ダイジェスト</span>再照合つきで。</li>
             </ul>
           </div>
         </div>
@@ -1036,13 +1040,13 @@
             </div>
             <ul class="arch-mechs">
               <li class="lang-en"><strong>Append-only decision log</strong>.</li>
-              <li class="lang-ja" lang="ja"><strong>追記だけの意思決定ログ</strong>。</li>
+              <li class="lang-ja" lang="ja"><strong>追記だけの意思決定<span class="nb">ログ</span></strong>。</li>
               <li class="lang-en"><strong>Crash-replayable event journal</strong>.</li>
-              <li class="lang-ja" lang="ja"><strong>クラッシュしても再生できるイベント履歴</strong>。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">クラッシュ</span>しても再生できる<span class="nb">イベント</span>履歴</strong>。</li>
               <li class="lang-en"><strong>Metrics</strong>.</li>
-              <li class="lang-ja" lang="ja"><strong>メトリクス</strong>。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">メトリクス</span></strong>。</li>
               <li class="lang-en"><strong>Control-plane attestation</strong> — a blessed hash of the machinery, so drift in the machinery itself is detected.</li>
-              <li class="lang-ja" lang="ja"><strong>コントロールプレーンの証明</strong>——仕組み自体のハッシュを祝福しておき、仕組みそのもののドリフトも検出する。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">コントロールプレーン</span>の証明</strong>——仕組み自体の<span class="nb">ハッシュ</span>を祝福しておき、仕組みそのものの<span class="nb">ドリフト</span>も検出する。</li>
             </ul>
           </div>
         </div>
@@ -1056,13 +1060,13 @@
               <span class="arch-kicker mono lang-en">Layer 7</span>
               <span class="arch-kicker mono lang-ja" lang="ja">層7</span>
               <span class="arch-name lang-en">Multi-session safety</span>
-              <span class="arch-name lang-ja" lang="ja">多重セッション安全（Multi-session safety）</span>
+              <span class="arch-name lang-ja" lang="ja">多重<span class="nb">セッション</span>安全（Multi-session safety）</span>
             </div>
             <ul class="arch-mechs">
               <li class="lang-en"><strong>Per-session queues</strong> with file locking.</li>
-              <li class="lang-ja" lang="ja"><strong>セッションごとのキュー</strong>＋ファイルロック。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">セッション</span>ごとの<span class="nb">キュー</span></strong>＋<span class="nb">ファイルロック</span>。</li>
               <li class="lang-en"><strong>Lane registry</strong> so two sessions don't fight over the same work.</li>
-              <li class="lang-ja" lang="ja"><strong>レーン登録</strong>——2つのセッションが同じ仕事を奪い合わないように。</li>
+              <li class="lang-ja" lang="ja"><strong><span class="nb">レーン</span>登録</strong>——2つの<span class="nb">セッション</span>が同じ仕事を奪い合わないように。</li>
               <li class="lang-en"><strong>Lost-wake detector</strong>.</li>
               <li class="lang-ja" lang="ja"><strong>起こし損ね検出</strong>。</li>
             </ul>
@@ -1086,12 +1090,12 @@
     <div class="card kpi-card" data-reveal>
       <div class="kpi-num mono" data-count-to="2.68">2.68</div>
       <div class="kpi-label lang-en">survived work / 1M tokens</div>
-      <div class="kpi-label lang-ja" lang="ja">生存した仕事 / 100万トークン</div>
+      <div class="kpi-label lang-ja" lang="ja">生存した仕事 / 100万<span class="nb">トークン</span></div>
       <p class="kpi-caption lang-en">
         Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
       </p>
       <p class="kpi-caption lang-ja" lang="ja">
-        ベンチマークではなく、比べる相手もいません。ようやく、感覚の代わりになる数字を1つ持てた、というだけです。
+        <span class="nb">ベンチマーク</span>ではなく、比べる相手もいません。ようやく、感覚の代わりになる数字を1つ持てた、というだけです。
       </p>
     </div>
   </section>
@@ -1113,7 +1117,7 @@
         idempotency, the works. I hardened it.
       </p>
       <p class="lang-ja" lang="ja">
-        最初の診断は外れていました。ループはタスク切れ——実行する作業がなくなって——止まっている、と考え、その対策としてバックログ採掘機を作りました。ROI のスコアリング、冪等性、ひととおり実装し、堅牢化もしました。
+        最初の診断は外れていました。<span class="nb">ループ</span>は<span class="nb">タスク</span>切れ——実行する作業がなくなって——止まっている、と考え、その対策として<span class="nb">バックログ</span>採掘機を作りました。ROI の<span class="nb">スコアリング</span>、冪等性、ひととおり実装し、堅牢化もしました。
       </p>
       <p class="lang-en">
         Then the real root cause surfaced: planning lived outside the loop. The loop died
@@ -1121,7 +1125,7 @@
         of things to mine.
       </p>
       <p class="lang-ja" lang="ja">
-        そのあと、真因が出てきました。計画がループの外にあったのです。ループは、手作業で1件だけ渡した計画を消化した時点で止まっていました。採掘する種が尽きたからではありません。
+        そのあと、真因が出てきました。計画が<span class="nb">ループ</span>の外にあったのです。<span class="nb">ループ</span>は、手作業で1件だけ渡した計画を消化した時点で止まっていました。採掘する種が尽きたからではありません。
       </p>
       <p class="lang-en">
         I cut the miner entirely.
@@ -1136,7 +1140,7 @@
           It survives only as an unused standalone tool.
         </p>
         <p class="lang-ja" lang="ja" style="margin-top: var(--space-2); font-size: var(--text-sm);">
-          今は、使われない単体ツールとして残っているだけです。
+          今は、使われない単体<span class="nb">ツール</span>として残っているだけです。
         </p>
       </div>
     </div>
@@ -1149,7 +1153,7 @@
       <p class="section-label mono lang-ja" lang="ja">06 &middot; 締めの皮肉</p>
       <div class="divider"></div>
       <h2 id="h06-en" class="lang-en">The gate that couldn't explain itself</h2>
-      <h2 id="h06-ja" class="lang-ja" lang="ja">自分を説明できなかったゲート</h2>
+      <h2 id="h06-ja" class="lang-ja" lang="ja">自分を説明できなかった<span class="nb">ゲート</span></h2>
     </div>
 
     <div class="irony-card" data-reveal>
@@ -1159,7 +1163,7 @@
           promise on itself.
         </p>
         <p class="lang-ja" lang="ja">
-          ゲートは、あらゆる停止を機械的に説明できるようにするためのものです。その約束を、自分自身に対して破りました。
+          <span class="nb">ゲート</span>は、あらゆる停止を機械的に説明できるようにするためのものです。その約束を、自分自身に対して破りました。
         </p>
         <p class="lang-en">
           Whenever a planner wrote the <code>verify</code> field as a list instead of a
@@ -1169,7 +1173,7 @@
           recorded reason was the string:
         </p>
         <p class="lang-ja" lang="ja">
-          計画役が <code>verify</code> フィールドを文字列ではなくリストで書くたびに、ゲートは捕まえそこねた Python の <code>AttributeError</code> を投げていました。実行役が、標準出力と標準エラーを混ぜたストリームの1行目しか残さなかったため、意思決定ログには、記録された理由が次の文字列だけ、という停止が<strong>28回・6セッション</strong>にわたって並びました:
+          計画役が <code>verify</code> <span class="nb">フィールド</span>を文字列ではなく<span class="nb">リスト</span>で書くたびに、<span class="nb">ゲート</span>は捕まえそこねた Python の <code>AttributeError</code> を投げていました。実行役が、標準出力と標準<span class="nb">エラー</span>を混ぜた<span class="nb">ストリーム</span>の1行目しか残さなかったため、意思決定<span class="nb">ログ</span>には、記録された理由が次の文字列だけ、という停止が<strong>28回・6<span class="nb">セッション</span></strong>にわたって並びました:
         </p>
         <code class="traceback-line">Traceback (most recent call last):</code>
         <p class="lang-en">
@@ -1193,7 +1197,7 @@
           </div>
           <div class="fail-box is-open spotlight-card">
             <span class="invert-tag mono lang-en">The obvious fix is worse</span>
-            <span class="invert-tag mono lang-ja" lang="ja">"明白な修正"のほうが危険</span>
+            <span class="invert-tag mono lang-ja" lang="ja">「明白な修正」のほうが危険</span>
             <p class="lang-en">
               Coerce the field to a string before <code>.strip()</code> and
               <code>["a","b"]</code> becomes <code>"['a', 'b']"</code> — a string with
@@ -1202,7 +1206,7 @@
               becomes a silent fail-open admit.
             </p>
             <p class="lang-ja" lang="ja">
-              <code>.strip()</code> の前に文字列へ変換する——すると <code>["a","b"]</code> は <code>"['a', 'b']"</code> になり、ちゃんと長さを持つ文字列として、長さのチェックも空検証のチェックも通ってしまいます。走らせられない検証コマンドを抱えたタスクが、通ってしまう。安全側で落ちるはずが、こっそり通す危険側に化けます。
+              <code>.strip()</code> の前に文字列へ変換する——すると <code>["a","b"]</code> は <code>"['a', 'b']"</code> になり、ちゃんと長さを持つ文字列として、長さの<span class="nb">チェック</span>も空検証の<span class="nb">チェック</span>も通ってしまいます。走らせられない検証<span class="nb">コマンド</span>を抱えた<span class="nb">タスク</span>が、通ってしまう。安全側で落ちるはずが、こっそり通す危険側に化けます。
             </p>
           </div>
         </div>
@@ -1212,7 +1216,7 @@
           not coerced, not admitted.
         </p>
         <p class="lang-ja" lang="ja" style="margin-top: var(--space-5);">
-          正しい直し方: 型の違うフィールドは、直し方を名指ししたメッセージつきで、ゲートが止める——変換もしない、通しもしない。
+          正しい直し方: 型の違う<span class="nb">フィールド</span>は、直し方を名指しした<span class="nb">メッセージ</span>つきで、<span class="nb">ゲート</span>が止める——変換もしない、通しもしない。
         </p>
       </div>
     </div>
@@ -1222,7 +1226,7 @@
   <section id="s07" aria-labelledby="h07-en">
     <div class="section-inner" data-reveal>
       <p class="section-label mono lang-en">07 &middot; Transferable Rules</p>
-      <p class="section-label mono lang-ja" lang="ja">07 &middot; 持ち帰れるルール</p>
+      <p class="section-label mono lang-ja" lang="ja">07 &middot; 持ち帰れる<span class="nb">ルール</span></p>
       <div class="divider"></div>
       <h2 id="h07-en" class="lang-en">What generalizes</h2>
       <h2 id="h07-ja" class="lang-ja" lang="ja">一般化できること</h2>
@@ -1232,12 +1236,12 @@
       <div class="card rule-item">
         <span class="rule-num mono">01</span>
         <p class="lang-en">Every rule must name its enforcement layer at birth. A rule that lives only in prose is a tracked defect, not a rule.</p>
-        <p class="lang-ja" lang="ja">どのルールも、生まれた時点で「どの層が強制するか」を名指しする。文章の中にしか無いルールは、ルールではなく、記録された欠陥です。</p>
+        <p class="lang-ja" lang="ja">どの<span class="nb">ルール</span>も、生まれた時点で「どの層が強制するか」を名指しする。文章の中にしか無い<span class="nb">ルール</span>は、<span class="nb">ルール</span>ではなく、記録された欠陥です。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">02</span>
         <p class="lang-en">Stop must be the default. Continuation has to be earned through a machine check.</p>
-        <p class="lang-ja" lang="ja">止まるのを既定にする。続けるほうは、機械のチェックを通って初めて認める。</p>
+        <p class="lang-ja" lang="ja">止まるのを既定にする。続けるほうは、機械の<span class="nb">チェック</span>を通って初めて認める。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">03</span>
@@ -1257,7 +1261,7 @@
       <div class="card rule-item">
         <span class="rule-num mono">06</span>
         <p class="lang-en">When hardening a gate, prefer failing closed to a coercion that silently passes.</p>
-        <p class="lang-ja" lang="ja">ゲートを硬くするときは、こっそり通す変換よりも、落ちる（安全側）を選ぶ。</p>
+        <p class="lang-ja" lang="ja"><span class="nb">ゲート</span>を硬くするときは、こっそり通す変換よりも、落ちる（安全側）を選ぶ。</p>
       </div>
     </div>
   </section>
@@ -1267,7 +1271,7 @@
 <footer>
   <div class="divider"></div>
   <p class="lang-en">Single HTML file. No build step, no dependencies, no external requests.</p>
-  <p class="lang-ja" lang="ja">HTML 1枚。ビルド工程なし、依存なし、外部リクエストなし。</p>
+  <p class="lang-ja" lang="ja">HTML 1枚。<span class="nb">ビルド</span>工程なし、依存なし、外部<span class="nb">リクエスト</span>なし。</p>
 </footer>
 
 <script>
