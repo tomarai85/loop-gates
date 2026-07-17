@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -84,14 +84,14 @@
     --radius-lg: 14px;
     --radius-xl: 22px;
 
-    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Liberation Mono", monospace;
+    --font-body: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: "SF Mono", "JetBrains Mono", Menlo, Consolas, "Hiragino Sans", "Noto Sans JP", "Liberation Mono", monospace;
 
     /* The one gradient role on the page -- reserved for the architecture diagram's gate node (Layer 2) only */
     --grad-indigo: linear-gradient(135deg, #4f7cff 0%, #a78bfa 55%, #f0abfc 100%);
   }
 
-  * , *::before, *::after { box-sizing: border-box; }
+  * , *::before, *::after { box-sizing: border-box; min-width: 0; }
 
   html { color-scheme: dark; }
   html[data-theme="light"] { color-scheme: light; }
@@ -217,6 +217,30 @@
   }
   .theme-toggle:active { transform: translateY(1px); }
 
+  .toggle-group {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  /* ============ Language toggle (EN default in markup; JA opt-in via JS+localStorage) ============ */
+  html[data-lang="en"] .lang-ja { display: none; }
+  html[data-lang="ja"] .lang-en { display: none; }
+
+  .lang-ja {
+    /* Japanese body wrapping: word-break:normal lets JP wrap between characters
+       (the natural JP behaviour); line-break:strict applies kinsoku so 。 、 」 never
+       start a line and small kana never orphan. NOT keep-all — keep-all forbids every
+       CJK break, so a space-less JP sentence becomes one unbreakable run and overflows.
+       overflow-wrap:normal keeps English loanwords (Claude Code, LLM) from splitting. */
+    word-break: normal;
+    overflow-wrap: normal;
+    line-break: strict;
+  }
+  h1.lang-ja, h2.lang-ja, h3.lang-ja, p.lang-ja, .lead.lang-ja, li.lang-ja {
+    max-width: 32em;
+  }
+
   main {
     max-width: var(--container-prose);
     margin: 0 auto;
@@ -315,7 +339,6 @@
 
   .hero h1 { margin-top: var(--space-3); }
   .hero .lead { margin-top: var(--space-4); }
-  .hero .lead + .lead { margin-top: var(--space-4); }
 
   /* ---- Hero entrance cascade (pure CSS, page-load, gated on html.js so no-JS = always visible) ---- */
   html.js #s00 .section-label,
@@ -330,7 +353,7 @@
   html.js #s00 .divider       { animation-delay: 240ms; }
   html.js #s00 h1             { animation-delay: 360ms; }
   html.js #s00 .lead          { animation-delay: 520ms; }
-  html.js #s00 .lead + .lead  { animation-delay: 720ms; }
+  html.js #s00 .lead-2        { animation-delay: 720ms; }
   @keyframes heroEnter { to { opacity: 1; transform: translateY(0); } }
 
   /* ============ Cards (generic) ============ */
@@ -710,40 +733,56 @@
 
 <header class="topbar">
   <span class="brand mono">Field Notes / Loop Engineering</span>
-  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme">Light</button>
+  <div class="toggle-group">
+    <button id="lang-toggle" class="theme-toggle" type="button" aria-label="Switch to Japanese">日本語</button>
+    <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle color theme">Light</button>
+  </div>
 </header>
 
 <main>
 
   <!-- 00: THESIS -->
-  <section id="s00" aria-labelledby="h00">
+  <section id="s00" aria-labelledby="h00-en">
     <div class="section-inner hero">
       <span class="dot-field" aria-hidden="true"></span>
-      <p class="section-label mono">00 &middot; Thesis</p>
+      <p class="section-label mono lang-en">00 &middot; Thesis</p>
+      <p class="section-label mono lang-ja" lang="ja">00 &middot; テーゼ</p>
       <div class="divider"></div>
-      <h1 id="h00">Written rules don't constrain an agent loop.</h1>
-      <p class="lead">
+      <h1 id="h00-en" class="lang-en">Written rules don't constrain an agent loop.</h1>
+      <h1 id="h00-ja" class="lang-ja" lang="ja">文章で書いたルールでは、エージェントのループは縛れない。</h1>
+      <p class="lead lang-en">
         I run an autonomous Claude Code <code>/loop</code> agent — a background loop that plans and
         executes its own next task without me sitting in the chat. This is what it took to make that
         loop trustworthy enough to actually leave unattended.
       </p>
-      <p class="lead">
+      <p class="lead lang-ja" lang="ja">
+        Claude Code の <code>/loop</code> を無人で走らせています。次にやることを自分で決めて実行しつづける、バックグラウンドで動くループです。それを、席を外しても任せられるほど信頼できるものにするまでの記録です。
+      </p>
+      <p class="lead lead-2 lang-en">
         Every failure class below was already forbidden in prose — in the prompt, in <code>CLAUDE.md</code>,
         in the docs. All four recurred anyway. The fix wasn't a better sentence. It was replacing the
         model's self-report — "I checked, it's fine" — with a machine-checked gate: code that runs,
         and can't be argued with.
       </p>
+      <p class="lead lead-2 lang-ja" lang="ja">
+        下に並べた失敗は、どれもプロンプトや <code>CLAUDE.md</code> に「やるな」と書いてありました。それでも4つとも再発しました。効いたのは、うまい一文ではありません。モデルの自己申告——「確認しました、大丈夫です」——を、機械のゲート、つまり実際に走って、言い訳のきかないコードに置き換えることでした。
+      </p>
     </div>
   </section>
 
   <!-- 01: FAILURE TAXONOMY -->
-  <section id="s01" aria-labelledby="h01">
+  <section id="s01" aria-labelledby="h01-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">01 &middot; Failure Taxonomy</p>
+      <p class="section-label mono lang-en">01 &middot; Failure Taxonomy</p>
+      <p class="section-label mono lang-ja" lang="ja">01 &middot; 失敗の分類</p>
       <div class="divider"></div>
-      <h2 id="h01">Four ways an agent avoids doing the work</h2>
-      <p class="lead">
+      <h2 id="h01-en" class="lang-en">Four ways an agent avoids doing the work</h2>
+      <h2 id="h01-ja" class="lang-ja" lang="ja">エージェントが仕事から逃げる4つの型</h2>
+      <p class="lead lang-en">
         These four recur across roughly 15 recorded corrections. Ordered worst-first.
+      </p>
+      <p class="lead lang-ja" lang="ja">
+        この4つが、およそ15回分の記録に繰り返し出てきました。影響が大きい順に並べます。
       </p>
     </div>
 
@@ -751,88 +790,125 @@
       <div class="card taxo-card is-frequent spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">A</span>
-          <h3>Parking</h3>
+          <h3 class="lang-en">Parking</h3>
+          <h3 class="lang-ja" lang="ja">停滞（Parking）</h3>
         </div>
-        <p>
+        <p class="lang-en">
           Stalling on reversible, already-authorized work while declaring
           "awaiting your judgment."
         </p>
-        <span class="badge">Most frequent</span>
+        <p class="lang-ja" lang="ja">
+          すでに許可済みで、元に戻せる仕事なのに、「判断待ちです」と言って手を止める。
+        </p>
+        <span class="badge lang-en">Most frequent</span>
+        <span class="badge lang-ja" lang="ja">いちばん多い</span>
       </div>
 
       <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">B</span>
-          <h3>Misdiagnosing</h3>
+          <h3 class="lang-en">Misdiagnosing</h3>
+          <h3 class="lang-ja" lang="ja">誤診（Misdiagnosing）</h3>
         </div>
-        <p>
+        <p class="lang-en">
           Blaming context length for API and rate-limit errors. The real cause was
           request-volume throttling — recorded across four separate memos.
+        </p>
+        <p class="lang-ja" lang="ja">
+          API やレート制限のエラーを、コンテキストの長さのせいにする。本当の原因は、リクエスト量が多いことによるサーバー側の制限でした。同じ誤診が、別々のメモに4回残っています。
         </p>
       </div>
 
       <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">C</span>
-          <h3>Idling</h3>
+          <h3 class="lang-en">Idling</h3>
+          <h3 class="lang-ja" lang="ja">空回り（Idling）</h3>
         </div>
-        <p>
+        <p class="lang-en">
           Sleeping long between cycles with nothing to actually wait for.
+        </p>
+        <p class="lang-ja" lang="ja">
+          待つものが何もないのに、サイクルの合間に長く眠る。
         </p>
       </div>
 
       <div class="card taxo-card spotlight-card">
         <div class="taxo-head">
           <span class="taxo-mark mono">D</span>
-          <h3>Overreaching</h3>
+          <h3 class="lang-en">Overreaching</h3>
+          <h3 class="lang-ja" lang="ja">越権（Overreaching）</h3>
         </div>
-        <p>
+        <p class="lang-en">
           Welding custom autonomy machinery onto a native command that was already
           mine, built-in, and didn't need it.
+        </p>
+        <p class="lang-ja" lang="ja">
+          もともと自分が管理していて、すでに組み込み済みで、手を入れる必要もないコマンドに、自作の仕組みを無理やりくっつける。
         </p>
       </div>
     </div>
   </section>
 
   <!-- 02: THE INVERSION -->
-  <section id="s02" aria-labelledby="h02">
+  <section id="s02" aria-labelledby="h02-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">02 &middot; The Inversion</p>
+      <p class="section-label mono lang-en">02 &middot; The Inversion</p>
+      <p class="section-label mono lang-ja" lang="ja">02 &middot; 反転</p>
       <div class="divider"></div>
-      <h2 id="h02">Stop is the default now</h2>
+      <h2 id="h02-en" class="lang-en">Stop is the default now</h2>
+      <h2 id="h02-ja" class="lang-ja" lang="ja">これからは、停止が既定</h2>
     </div>
 
     <div class="invert-track" data-reveal-stagger>
       <div class="invert-box is-before">
-        <span class="invert-tag mono">Before</span>
-        <p>
+        <span class="invert-tag mono lang-en">Before</span>
+        <span class="invert-tag mono lang-ja" lang="ja">BEFORE</span>
+        <p class="lang-en">
           The model decided when to stop. Any plausible-sounding sentence could end
           a work session — including all four failure patterns above.
+        </p>
+        <p class="lang-ja" lang="ja">
+          モデルが、いつ止まるかを決めていた。それらしい一文があれば、いつでも作業を終われた——上の4つの失敗も含めて。
         </p>
       </div>
       <div class="invert-arrow" aria-hidden="true">&rarr;</div>
       <div class="invert-box is-after">
-        <span class="invert-tag mono">After</span>
-        <p>
+        <span class="invert-tag mono lang-en">After</span>
+        <span class="invert-tag mono lang-ja" lang="ja">AFTER</span>
+        <p class="lang-en">
           A machine admissibility gate decides. Continuing requires passing the
           gate; only the gate can sanction a stop. No phrasing escapes it.
+        </p>
+        <p class="lang-ja" lang="ja">
+          機械の入場ゲートが判断する。続けるにはゲートを通る必要があり、止めてよいと認めるのもゲートだけ。どんな言い回しも、ここは抜けられません。
         </p>
       </div>
     </div>
 
-    <p class="lead" data-reveal>
-      What the gate actually checks — and everything built around it — is the rest of this page.
-    </p>
+    <div data-reveal>
+      <p class="lead lang-en">
+        What the gate actually checks — and everything built around it — is the rest of this page.
+      </p>
+      <p class="lead lang-ja" lang="ja">
+        ゲートが実際に何をチェックし、その周りに何を積んだか——それを、この先で見ていきます。
+      </p>
+    </div>
   </section>
 
   <!-- 03: 7-LAYER ARCHITECTURE (centerpiece) -->
-  <section id="s03" aria-labelledby="h03">
+  <section id="s03" aria-labelledby="h03-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">03 &middot; Architecture</p>
+      <p class="section-label mono lang-en">03 &middot; Architecture</p>
+      <p class="section-label mono lang-ja" lang="ja">03 &middot; アーキテクチャ</p>
       <div class="divider"></div>
-      <h2 id="h03">Seven layers, one gate at the center</h2>
-      <p class="lead">
+      <h2 id="h03-en" class="lang-en">Seven layers, one gate at the center</h2>
+      <h2 id="h03-ja" class="lang-ja" lang="ja">7層、中心にゲートが1つ</h2>
+      <p class="lead lang-en">
         Each layer was added because a failure class above found the gap in the layer before it.
+      </p>
+      <p class="lead lang-ja" lang="ja">
+        各層は、上の失敗のどれかが前の層の穴を突くたびに、足していきました。
       </p>
     </div>
 
@@ -843,12 +919,16 @@
           <div class="arch-node"><span class="arch-node-circle mono">1</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 1</span>
-              <span class="arch-name">Planning</span>
+              <span class="arch-kicker mono lang-en">Layer 1</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層1</span>
+              <span class="arch-name lang-en">Planning</span>
+              <span class="arch-name lang-ja" lang="ja">計画（Planning）</span>
             </div>
             <ul class="arch-mechs">
-              <li><strong>Plan-of-record file</strong>, schema-versioned, written by a fresh planner subagent — not the tired executor.</li>
-              <li><strong>Truth-reviewer sidecar</strong> checks the planner's claimed evidence.</li>
+              <li class="lang-en"><strong>Plan-of-record file</strong>, schema-versioned, written by a fresh planner subagent — not the tired executor.</li>
+              <li class="lang-ja" lang="ja"><strong>計画の正本ファイル</strong>。スキーマにバージョンを持ち、疲れた実行役ではなく、新しい計画役サブエージェントが書く。</li>
+              <li class="lang-en"><strong>Truth-reviewer sidecar</strong> checks the planner's claimed evidence.</li>
+              <li class="lang-ja" lang="ja"><strong>真偽レビューのサイドカー</strong>が、計画役の挙げた根拠を照合する。</li>
             </ul>
           </div>
         </div>
@@ -859,15 +939,22 @@
           <div class="arch-node"><span class="arch-node-circle mono">2</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 2</span>
-              <span class="arch-name">Admission (the gate)</span>
+              <span class="arch-kicker mono lang-en">Layer 2</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層2</span>
+              <span class="arch-name lang-en">Admission (the gate)</span>
+              <span class="arch-name lang-ja" lang="ja">入場（ゲート）</span>
             </div>
             <ul class="arch-mechs">
-              <li>Mechanically checks each proposed task for <strong>mission linkage</strong>.</li>
-              <li>Requires an attached <strong>runnable verifier</strong>.</li>
-              <li>Requires <strong>self-doability</strong>.</li>
-              <li>Enforces a <strong>discovery cap</strong> — max 1 open exploratory task.</li>
-              <li>Requires a documented <strong>no-regret decomposition attempt</strong>.</li>
+              <li class="lang-en">Mechanically checks each proposed task for <strong>mission linkage</strong>.</li>
+              <li class="lang-ja" lang="ja">提案された各タスクが、<strong>ミッションにつながっているか</strong>を機械が確認する。</li>
+              <li class="lang-en">Requires an attached <strong>runnable verifier</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>走らせられる検証コマンド</strong>が付いていることを要求する。</li>
+              <li class="lang-en">Requires <strong>self-doability</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>自分の手で完結できる</strong>ことを要求する。</li>
+              <li class="lang-en">Enforces a <strong>discovery cap</strong> — max 1 open exploratory task.</li>
+              <li class="lang-ja" lang="ja"><strong>探索の上限</strong>を課す——同時に開いていい探索タスクは1つまで。</li>
+              <li class="lang-en">Requires a documented <strong>no-regret decomposition attempt</strong>.</li>
+              <li class="lang-ja" lang="ja">「<strong>後悔しない分解</strong>」を試した記録を要求する。</li>
             </ul>
           </div>
         </div>
@@ -878,13 +965,18 @@
           <div class="arch-node"><span class="arch-node-circle mono">3</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 3</span>
-              <span class="arch-name">Stopping</span>
+              <span class="arch-kicker mono lang-en">Layer 3</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層3</span>
+              <span class="arch-name lang-en">Stopping</span>
+              <span class="arch-name lang-ja" lang="ja">停止（Stopping）</span>
             </div>
             <ul class="arch-mechs">
-              <li>Only the gate issues a <strong>stop sanction</strong>.</li>
-              <li><strong>Killswitch ladder</strong> — throttle, pause, stop on machine-measured triggers.</li>
-              <li><strong>Flee-detector</strong> — an LLM judge flagging the agent parking on doable work.</li>
+              <li class="lang-en">Only the gate issues a <strong>stop sanction</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>停止を認める</strong>のはゲートだけ。</li>
+              <li class="lang-en"><strong>Killswitch ladder</strong> — throttle, pause, stop on machine-measured triggers.</li>
+              <li class="lang-ja" lang="ja"><strong>キルスイッチの段階</strong>——機械が測った引き金で、絞る・止める・落とす。</li>
+              <li class="lang-en"><strong>Flee-detector</strong> — an LLM judge flagging the agent parking on doable work.</li>
+              <li class="lang-ja" lang="ja"><strong>逃げ検出</strong>——対応できる仕事の前で手を止めていないか、LLM の判定役が見張る。</li>
             </ul>
           </div>
         </div>
@@ -895,14 +987,20 @@
           <div class="arch-node"><span class="arch-node-circle mono">4</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 4</span>
-              <span class="arch-name">Verification</span>
+              <span class="arch-kicker mono lang-en">Layer 4</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層4</span>
+              <span class="arch-name lang-en">Verification</span>
+              <span class="arch-name lang-ja" lang="ja">検証（Verification）</span>
             </div>
             <ul class="arch-mechs">
-              <li>Every done task's verifier is <strong>re-run later</strong> ("survival"); done decays.</li>
-              <li><strong>Vacuous verifiers</strong> rejected — a bare <code>true</code> or a bare <code>echo</code> doesn't count.</li>
-              <li><strong>Verifier-drift detection</strong> catches edit-the-check.</li>
-              <li><strong>Repeat-failure breaker</strong> stops loops on the same normalized failure signature.</li>
+              <li class="lang-en">Every done task's verifier is <strong>re-run later</strong> ("survival"); done decays.</li>
+              <li class="lang-ja" lang="ja">完了したタスクの検証コマンドは、<strong>後でもう一度走らせる</strong>（「生存確認」）。完了は腐る。</li>
+              <li class="lang-en"><strong>Vacuous verifiers</strong> rejected — a bare <code>true</code> or a bare <code>echo</code> doesn't count.</li>
+              <li class="lang-ja" lang="ja"><strong>空の検証は却下</strong>——ただの <code>true</code> や中身のない <code>echo</code> は認めない。</li>
+              <li class="lang-en"><strong>Verifier-drift detection</strong> catches edit-the-check.</li>
+              <li class="lang-ja" lang="ja"><strong>検証ドリフト検出</strong>が、検査そのものの書き換えを捕まえる。</li>
+              <li class="lang-en"><strong>Repeat-failure breaker</strong> stops loops on the same normalized failure signature.</li>
+              <li class="lang-ja" lang="ja">同じ失敗の反復を、<strong>正規化した署名</strong>で見て、ループを止める。</li>
             </ul>
           </div>
         </div>
@@ -913,11 +1011,14 @@
           <div class="arch-node"><span class="arch-node-circle mono">5</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 5</span>
-              <span class="arch-name">Execution</span>
+              <span class="arch-kicker mono lang-en">Layer 5</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層5</span>
+              <span class="arch-name lang-en">Execution</span>
+              <span class="arch-name lang-ja" lang="ja">実行（Execution）</span>
             </div>
             <ul class="arch-mechs">
-              <li><strong>Parallel batch executor</strong> — claim, finish, abort — with atomic claim and digest re-check.</li>
+              <li class="lang-en"><strong>Parallel batch executor</strong> — claim, finish, abort — with atomic claim and digest re-check.</li>
+              <li class="lang-ja" lang="ja"><strong>並列バッチ実行</strong>——確保・完了・中止を、アトミックな確保とダイジェスト再照合つきで。</li>
             </ul>
           </div>
         </div>
@@ -928,14 +1029,20 @@
           <div class="arch-node"><span class="arch-node-circle mono">6</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 6</span>
-              <span class="arch-name">Observation</span>
+              <span class="arch-kicker mono lang-en">Layer 6</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層6</span>
+              <span class="arch-name lang-en">Observation</span>
+              <span class="arch-name lang-ja" lang="ja">観測（Observation）</span>
             </div>
             <ul class="arch-mechs">
-              <li><strong>Append-only decision log</strong>.</li>
-              <li><strong>Crash-replayable event journal</strong>.</li>
-              <li><strong>Metrics</strong>.</li>
-              <li><strong>Control-plane attestation</strong> — a blessed hash of the machinery, so drift in the machinery itself is detected.</li>
+              <li class="lang-en"><strong>Append-only decision log</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>追記だけの意思決定ログ</strong>。</li>
+              <li class="lang-en"><strong>Crash-replayable event journal</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>クラッシュしても再生できるイベント履歴</strong>。</li>
+              <li class="lang-en"><strong>Metrics</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>メトリクス</strong>。</li>
+              <li class="lang-en"><strong>Control-plane attestation</strong> — a blessed hash of the machinery, so drift in the machinery itself is detected.</li>
+              <li class="lang-ja" lang="ja"><strong>コントロールプレーンの証明</strong>——仕組み自体のハッシュを祝福しておき、仕組みそのもののドリフトも検出する。</li>
             </ul>
           </div>
         </div>
@@ -946,13 +1053,18 @@
           <div class="arch-node"><span class="arch-node-circle mono">7</span></div>
           <div class="arch-content">
             <div class="arch-name-row">
-              <span class="arch-kicker mono">Layer 7</span>
-              <span class="arch-name">Multi-session safety</span>
+              <span class="arch-kicker mono lang-en">Layer 7</span>
+              <span class="arch-kicker mono lang-ja" lang="ja">層7</span>
+              <span class="arch-name lang-en">Multi-session safety</span>
+              <span class="arch-name lang-ja" lang="ja">多重セッション安全（Multi-session safety）</span>
             </div>
             <ul class="arch-mechs">
-              <li><strong>Per-session queues</strong> with file locking.</li>
-              <li><strong>Lane registry</strong> so two sessions don't fight over the same work.</li>
-              <li><strong>Lost-wake detector</strong>.</li>
+              <li class="lang-en"><strong>Per-session queues</strong> with file locking.</li>
+              <li class="lang-ja" lang="ja"><strong>セッションごとのキュー</strong>＋ファイルロック。</li>
+              <li class="lang-en"><strong>Lane registry</strong> so two sessions don't fight over the same work.</li>
+              <li class="lang-ja" lang="ja"><strong>レーン登録</strong>——2つのセッションが同じ仕事を奪い合わないように。</li>
+              <li class="lang-en"><strong>Lost-wake detector</strong>.</li>
+              <li class="lang-ja" lang="ja"><strong>起こし損ね検出</strong>。</li>
             </ul>
           </div>
         </div>
@@ -962,139 +1074,190 @@
   </section>
 
   <!-- 04: THE ONE VERIFIED METRIC -->
-  <section id="s04" aria-labelledby="h04">
+  <section id="s04" aria-labelledby="h04-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">04 &middot; The One Verified Metric</p>
+      <p class="section-label mono lang-en">04 &middot; The One Verified Metric</p>
+      <p class="section-label mono lang-ja" lang="ja">04 &middot; 唯一の実測値</p>
       <div class="divider"></div>
-      <h2 id="h04">One number, first measurement</h2>
+      <h2 id="h04-en" class="lang-en">One number, first measurement</h2>
+      <h2 id="h04-ja" class="lang-ja" lang="ja">たった1つの数字、初めての計測</h2>
     </div>
 
     <div class="card kpi-card" data-reveal>
       <div class="kpi-num mono" data-count-to="2.68">2.68</div>
-      <div class="kpi-label">survived work / 1M tokens</div>
-      <p class="kpi-caption">
+      <div class="kpi-label lang-en">survived work / 1M tokens</div>
+      <div class="kpi-label lang-ja" lang="ja">生存した仕事 / 100万トークン</div>
+      <p class="kpi-caption lang-en">
         Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
+      </p>
+      <p class="kpi-caption lang-ja" lang="ja">
+        ベンチマークではなく、比べる相手もいません。ようやく、感覚の代わりになる数字を1つ持てた、というだけです。
       </p>
     </div>
   </section>
 
   <!-- 05: WHAT I THREW AWAY -->
-  <section id="s05" aria-labelledby="h05">
+  <section id="s05" aria-labelledby="h05-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">05 &middot; What I Threw Away</p>
+      <p class="section-label mono lang-en">05 &middot; What I Threw Away</p>
+      <p class="section-label mono lang-ja" lang="ja">05 &middot; 捨てたもの</p>
       <div class="divider"></div>
-      <h2 id="h05">The first diagnosis was wrong</h2>
+      <h2 id="h05-en" class="lang-en">The first diagnosis was wrong</h2>
+      <h2 id="h05-ja" class="lang-ja" lang="ja">最初の診断は間違っていた</h2>
     </div>
 
     <div class="card thrown-card prose" data-reveal>
-      <p>
+      <p class="lang-en">
         My first diagnosis was wrong. I concluded the loop was dying of task starvation —
         running out of work to do — and built a backlog miner to fix it: ROI scoring,
         idempotency, the works. I hardened it.
       </p>
-      <p>
+      <p class="lang-ja" lang="ja">
+        最初の診断は外れていました。ループはタスク切れ——実行する作業がなくなって——止まっている、と考え、その対策としてバックログ採掘機を作りました。ROI のスコアリング、冪等性、ひととおり実装し、堅牢化もしました。
+      </p>
+      <p class="lang-en">
         Then the real root cause surfaced: planning lived outside the loop. The loop died
         the moment it consumed the one hand-made plan I'd fed it — not because it ran out
         of things to mine.
       </p>
-      <p>
+      <p class="lang-ja" lang="ja">
+        そのあと、真因が出てきました。計画がループの外にあったのです。ループは、手作業で1件だけ渡した計画を消化した時点で止まっていました。採掘する種が尽きたからではありません。
+      </p>
+      <p class="lang-en">
         I cut the miner entirely.
       </p>
+      <p class="lang-ja" lang="ja">
+        採掘機はまるごと外しました。
+      </p>
       <div class="thrown-status">
-        <span class="badge">Discarded</span>
-        <p style="margin-top: var(--space-2); font-size: var(--text-sm);">
+        <span class="badge lang-en">Discarded</span>
+        <span class="badge lang-ja" lang="ja">破棄</span>
+        <p class="lang-en" style="margin-top: var(--space-2); font-size: var(--text-sm);">
           It survives only as an unused standalone tool.
+        </p>
+        <p class="lang-ja" lang="ja" style="margin-top: var(--space-2); font-size: var(--text-sm);">
+          今は、使われない単体ツールとして残っているだけです。
         </p>
       </div>
     </div>
   </section>
 
   <!-- 06: THE CLOSING IRONY -->
-  <section id="s06" aria-labelledby="h06">
+  <section id="s06" aria-labelledby="h06-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">06 &middot; The Closing Irony</p>
+      <p class="section-label mono lang-en">06 &middot; The Closing Irony</p>
+      <p class="section-label mono lang-ja" lang="ja">06 &middot; 締めの皮肉</p>
       <div class="divider"></div>
-      <h2 id="h06">The gate that couldn't explain itself</h2>
+      <h2 id="h06-en" class="lang-en">The gate that couldn't explain itself</h2>
+      <h2 id="h06-ja" class="lang-ja" lang="ja">自分を説明できなかったゲート</h2>
     </div>
 
     <div class="irony-card" data-reveal>
       <div class="prose">
-        <p>
+        <p class="lang-en">
           The gate exists to make every stop mechanically answerable. It broke that
           promise on itself.
         </p>
-        <p>
+        <p class="lang-ja" lang="ja">
+          ゲートは、あらゆる停止を機械的に説明できるようにするためのものです。その約束を、自分自身に対して破りました。
+        </p>
+        <p class="lang-en">
           Whenever a planner wrote the <code>verify</code> field as a list instead of a
           string, the gate threw an uncaught Python <code>AttributeError</code>. The
           runner kept only the first line of a merged stdout+stderr stream, so the
           decision log recorded <strong>28 stops across 6 sessions</strong> whose entire
           recorded reason was the string:
         </p>
+        <p class="lang-ja" lang="ja">
+          計画役が <code>verify</code> フィールドを文字列ではなくリストで書くたびに、ゲートは捕まえそこねた Python の <code>AttributeError</code> を投げていました。実行役が、標準出力と標準エラーを混ぜたストリームの1行目しか残さなかったため、意思決定ログには、記録された理由が次の文字列だけ、という停止が<strong>28回・6セッション</strong>にわたって並びました:
+        </p>
         <code class="traceback-line">Traceback (most recent call last):</code>
-        <p>
+        <p class="lang-en">
           An unanswerable stop, emitted by the machine whose one job is answerable stops.
+        </p>
+        <p class="lang-ja" lang="ja">
+          答えられない停止。あらゆる停止を答えられるものにするのが唯一の仕事、その機械が出したものです。
         </p>
 
         <div class="fail-grid">
           <div class="fail-box is-closed spotlight-card">
-            <span class="invert-tag mono">Fail-closed</span>
-            <p>
+            <span class="invert-tag mono lang-en">Fail-closed</span>
+            <span class="invert-tag mono lang-ja" lang="ja">FAIL-CLOSED（安全側で停止）</span>
+            <p class="lang-en">
               It crashed instead of continuing. Nothing was corrupted, nothing was
               silently admitted. It was just mute.
             </p>
+            <p class="lang-ja" lang="ja">
+              続けるのではなく、落ちました。壊れたものは何もなく、こっそり通ったものも何もない。ただ、黙っていただけです。
+            </p>
           </div>
           <div class="fail-box is-open spotlight-card">
-            <span class="invert-tag mono">The obvious fix is worse</span>
-            <p>
+            <span class="invert-tag mono lang-en">The obvious fix is worse</span>
+            <span class="invert-tag mono lang-ja" lang="ja">"明白な修正"のほうが危険</span>
+            <p class="lang-en">
               Coerce the field to a string before <code>.strip()</code> and
               <code>["a","b"]</code> becomes <code>"['a', 'b']"</code> — a string with
               real length, which clears both the length check and the vacuous-verifier
               check, admitting a task whose verifier can never run. A fail-closed crash
               becomes a silent fail-open admit.
             </p>
+            <p class="lang-ja" lang="ja">
+              <code>.strip()</code> の前に文字列へ変換する——すると <code>["a","b"]</code> は <code>"['a', 'b']"</code> になり、ちゃんと長さを持つ文字列として、長さのチェックも空検証のチェックも通ってしまいます。走らせられない検証コマンドを抱えたタスクが、通ってしまう。安全側で落ちるはずが、こっそり通す危険側に化けます。
+            </p>
           </div>
         </div>
 
-        <p style="margin-top: var(--space-5);">
+        <p class="lang-en" style="margin-top: var(--space-5);">
           Correct fix: a wrong-typed field gets gated, with a message naming the fix —
           not coerced, not admitted.
+        </p>
+        <p class="lang-ja" lang="ja" style="margin-top: var(--space-5);">
+          正しい直し方: 型の違うフィールドは、直し方を名指ししたメッセージつきで、ゲートが止める——変換もしない、通しもしない。
         </p>
       </div>
     </div>
   </section>
 
   <!-- 07: TRANSFERABLE RULES -->
-  <section id="s07" aria-labelledby="h07">
+  <section id="s07" aria-labelledby="h07-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono">07 &middot; Transferable Rules</p>
+      <p class="section-label mono lang-en">07 &middot; Transferable Rules</p>
+      <p class="section-label mono lang-ja" lang="ja">07 &middot; 持ち帰れるルール</p>
       <div class="divider"></div>
-      <h2 id="h07">What generalizes</h2>
+      <h2 id="h07-en" class="lang-en">What generalizes</h2>
+      <h2 id="h07-ja" class="lang-ja" lang="ja">一般化できること</h2>
     </div>
 
     <div class="rules-list" data-reveal-stagger>
       <div class="card rule-item">
         <span class="rule-num mono">01</span>
-        <p>Every rule must name its enforcement layer at birth. A rule that lives only in prose is a tracked defect, not a rule.</p>
+        <p class="lang-en">Every rule must name its enforcement layer at birth. A rule that lives only in prose is a tracked defect, not a rule.</p>
+        <p class="lang-ja" lang="ja">どのルールも、生まれた時点で「どの層が強制するか」を名指しする。文章の中にしか無いルールは、ルールではなく、記録された欠陥です。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">02</span>
-        <p>Stop must be the default. Continuation has to be earned through a machine check.</p>
+        <p class="lang-en">Stop must be the default. Continuation has to be earned through a machine check.</p>
+        <p class="lang-ja" lang="ja">止まるのを既定にする。続けるほうは、機械のチェックを通って初めて認める。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">03</span>
-        <p>A verifier that cannot fail verifies nothing. Reject vacuous verifiers explicitly.</p>
+        <p class="lang-en">A verifier that cannot fail verifies nothing. Reject vacuous verifiers explicitly.</p>
+        <p class="lang-ja" lang="ja">落ちようのない検証は、何も検証していない。空の検証は、はっきり却下する。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">04</span>
-        <p>Re-run old verifiers. "Done" decays.</p>
+        <p class="lang-en">Re-run old verifiers. "Done" decays.</p>
+        <p class="lang-ja" lang="ja">古い検証を、もう一度走らせる。「完了」は腐る。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">05</span>
-        <p>Watch for edits to the check itself.</p>
+        <p class="lang-en">Watch for edits to the check itself.</p>
+        <p class="lang-ja" lang="ja">検査そのものへの書き換えを、見張る。</p>
       </div>
       <div class="card rule-item">
         <span class="rule-num mono">06</span>
-        <p>When hardening a gate, prefer failing closed to a coercion that silently passes.</p>
+        <p class="lang-en">When hardening a gate, prefer failing closed to a coercion that silently passes.</p>
+        <p class="lang-ja" lang="ja">ゲートを硬くするときは、こっそり通す変換よりも、落ちる（安全側）を選ぶ。</p>
       </div>
     </div>
   </section>
@@ -1103,7 +1266,8 @@
 
 <footer>
   <div class="divider"></div>
-  <p>Single HTML file. No build step, no dependencies, no external requests.</p>
+  <p class="lang-en">Single HTML file. No build step, no dependencies, no external requests.</p>
+  <p class="lang-ja" lang="ja">HTML 1枚。ビルド工程なし、依存なし、外部リクエストなし。</p>
 </footer>
 
 <script>
@@ -1148,6 +1312,56 @@
     var next = current === 'light' ? 'dark' : 'light';
     applyTheme(next);
     safeSet('theme', next);
+  });
+
+  /* ---- Language toggle: EN default, JA opt-in, localStorage-persisted ---- */
+  var langToggle = document.getElementById('lang-toggle');
+  var TITLE_EN = document.title;
+  var TITLE_JA = '機械でチェックする、自律エージェント・ループのゲート';
+  var SECTION_NUMS = ['00', '01', '02', '03', '04', '05', '06', '07'];
+
+  function syncSectionLabelledby(lang) {
+    SECTION_NUMS.forEach(function (num) {
+      var section = document.getElementById('s' + num);
+      if (section) { section.setAttribute('aria-labelledby', 'h' + num + '-' + lang); }
+    });
+  }
+
+  function applyLang(lang) {
+    if (lang === 'ja') {
+      root.setAttribute('data-lang', 'ja');
+      root.setAttribute('lang', 'ja');
+      langToggle.textContent = 'EN';
+      langToggle.setAttribute('aria-label', '英語表示に切り替え');
+      document.title = TITLE_JA;
+    } else {
+      root.setAttribute('data-lang', 'en');
+      root.setAttribute('lang', 'en');
+      langToggle.textContent = '日本語';
+      langToggle.setAttribute('aria-label', 'Switch to Japanese');
+      document.title = TITLE_EN;
+    }
+    syncSectionLabelledby(lang);
+  }
+
+  var initialLang = 'en';
+  try {
+    var savedLang = safeGet('lang');
+    if (savedLang === 'ja' || savedLang === 'en') {
+      initialLang = savedLang;
+    }
+    /* No saved choice: always start English (settled public default), ignoring
+       navigator.language entirely. */
+  } catch (e) {
+    initialLang = 'en';
+  }
+  applyLang(initialLang);
+
+  langToggle.addEventListener('click', function () {
+    var current = root.getAttribute('data-lang') === 'ja' ? 'ja' : 'en';
+    var next = current === 'ja' ? 'en' : 'ja';
+    applyLang(next);
+    safeSet('lang', next);
   });
 
   var prefersReducedMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
