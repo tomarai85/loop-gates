@@ -1077,14 +1077,116 @@
     </div>
   </section>
 
-  <!-- 04: THE ONE VERIFIED METRIC -->
+  <!-- 04: THE PLANNING LAYER -->
   <section id="s04" aria-labelledby="h04-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono lang-en">04 &middot; The One Verified Metric</p>
-      <p class="section-label mono lang-ja" lang="ja">04 &middot; 唯一の実測値</p>
+      <p class="section-label mono lang-en">04 &middot; The Planning Layer</p>
+      <p class="section-label mono lang-ja" lang="ja">04 &middot; 計画層</p>
       <div class="divider"></div>
-      <h2 id="h04-en" class="lang-en">One number, first measurement</h2>
-      <h2 id="h04-ja" class="lang-ja" lang="ja">たった1つの数字、初めての計測</h2>
+      <h2 id="h04-en" class="lang-en">How the loop decides what to do next</h2>
+      <h2 id="h04-ja" class="lang-ja" lang="ja"><span class="nb">ループ</span>は次の一手をどう決めるか</h2>
+      <p class="lead lang-en">
+        The gate can only reject bad tasks — it can't invent good ones. That falls to the
+        planning layer, and it's where "the agent finds its own work" either stays honest or
+        turns into busywork. The mechanism:
+      </p>
+      <p class="lead lang-ja" lang="ja">
+        <span class="nb">ゲート</span>にできるのは、悪い<span class="nb">タスク</span>を弾くことだけ。良い<span class="nb">タスク</span>を生み出すことはできません。それは計画層の仕事で、「<span class="nb">エージェント</span>が自分で仕事を見つける」が正直なままでいるか、ただの手すさびに変わるか——その分かれ目もここにあります。仕組みはこうです。
+      </p>
+    </div>
+
+    <!-- Reuses section 01's taxonomy card visual language verbatim (.taxo-grid / .taxo-card / .taxo-head / .taxo-mark) and section 03's bulleted mechanism list (.arch-mechs) -- no new component style introduced. -->
+    <div class="taxo-grid" data-reveal-stagger>
+      <div class="card taxo-card spotlight-card">
+        <div class="taxo-head">
+          <span class="taxo-mark mono">1</span>
+          <h3 class="lang-en">A fresh reader, not the tired executor</h3>
+          <h3 class="lang-ja" lang="ja">疲れた実行役ではなく、新しい読み手</h3>
+        </div>
+        <p class="lang-en">
+          The plan is written by a planner subagent spawned with a clean context — not the
+          same run that just executed. The executor has a stake in its own last decision; a
+          fresh reader doesn't. It reads four things: the mission's <code>done-bar</code>
+          (what "finished" means), the decision log (what's already been tried), the current
+          task queue (<code>done</code>, <code>pending</code>, or <code>gated</code>), and
+          the live signals — error logs, the decision journal, metrics.
+        </p>
+        <p class="lang-ja" lang="ja">
+          計画は、たった今実行した当人ではなく、まっさらな文脈で起動した計画役<span class="nb">サブエージェント</span>が書きます。実行役は自分の直前の判断に肩入れしてしまう。新しい読み手はしません。読むのは4つ——<span class="nb">ミッション</span>の <code>done-bar</code>（何をもって「終わり」とするか）、意思決定<span class="nb">ログ</span>（すでに何を試したか）、今の<span class="nb">タスクキュー</span>（<code>done</code> / <code>pending</code> / <code>gated</code>）、そして<span class="nb">ライブ</span>信号——<span class="nb">エラーログ</span>、決定<span class="nb">ジャーナル</span>、<span class="nb">メトリクス</span>。
+        </p>
+      </div>
+
+      <div class="card taxo-card spotlight-card">
+        <div class="taxo-head">
+          <span class="taxo-mark mono">2</span>
+          <h3 class="lang-en">Two ways it recognizes work</h3>
+          <h3 class="lang-ja" lang="ja">仕事を認識する2つの道</h3>
+        </div>
+        <ul class="arch-mechs">
+          <li class="lang-en"><strong><code>directed</code></strong> — a sub-goal of the done-bar that isn't met yet.</li>
+          <li class="lang-ja" lang="ja"><strong><code>directed</code></strong> — <code>done-bar</code> のうち、まだ満たされていない<span class="nb">サブゴール</span>。</li>
+          <li class="lang-en"><strong><code>discovery</code></strong> — an anomaly in the live signals: a failure that keeps recurring, a gap nothing measures. This is the interesting one, and the one most likely to become invented busywork, so it's fenced. A discovery task must cite an actual observed signal — a real log line or journal entry, not a hunch — and only one discovery task may be open at a time.</li>
+          <li class="lang-ja" lang="ja"><strong><code>discovery</code></strong>（発見） — <span class="nb">ライブ</span>信号の中の異常。繰り返す<span class="nb">エラー</span>、何も測っていない穴。これが面白い方であり、でっち上げの手すさびに化けやすい方でもあるので、囲ってあります。発見<span class="nb">タスク</span>は、実際に観測された信号——勘ではなく、本物の<span class="nb">ログ</span>行や<span class="nb">ジャーナル</span>記録——を引用しないと通りません。そして同時に開ける発見<span class="nb">タスク</span>は、1つだけ。</li>
+        </ul>
+      </div>
+
+      <div class="card taxo-card spotlight-card">
+        <div class="taxo-head">
+          <span class="taxo-mark mono">3</span>
+          <h3 class="lang-en">"Nothing to do" has to be earned</h3>
+          <h3 class="lang-ja" lang="ja">「やることが無い」は、ただでは言えない</h3>
+        </div>
+        <p class="lang-en">
+          Before the loop may declare it's out of work, it has to record a
+          <code>no-regret</code> attempt: a decomposition it tried, or a concrete reason none
+          exists. A "nothing left" claim without that record is rejected. Stopping is cheap
+          to claim and expensive to check, so the system makes the claim carry the proof.
+        </p>
+        <p class="lang-ja" lang="ja">
+          <span class="nb">ループ</span>が「仕事が尽きた」と宣言してよいのは、<code>no-regret</code> の試みを記録したあとだけです。試した分解か、あるいは「無い」と言える具体的な理由か。その記録なしに「もう無い」と宣言しても、却下されます。停止は、主張するのは安く、確かめるのは高い。だから、主張する側に証明を持たせます。
+        </p>
+      </div>
+
+      <div class="card taxo-card spotlight-card">
+        <div class="taxo-head">
+          <span class="taxo-mark mono">4</span>
+          <h3 class="lang-en">Every proposed task is a record, not a sentence</h3>
+          <h3 class="lang-ja" lang="ja">提案<span class="nb">タスク</span>は、一文ではなく1件の記録</h3>
+        </div>
+        <p class="lang-en">
+          Each task the planner emits is structured: a title, a <code>why_now</code> that
+          names the mission link, a <code>verify</code> command that actually runs, whether
+          it's self-doable, which files it will write, its origin (<code>directed</code> or
+          <code>discovery</code>), and — for <code>discovery</code> — the cited signal. That
+          structure is what lets the next layer, the gate, check it mechanically instead of
+          trusting prose.
+        </p>
+        <p class="lang-ja" lang="ja">
+          計画役が出す<span class="nb">タスク</span>は、どれも構造を持っています。<span class="nb">タイトル</span>、<span class="nb">ミッション</span>とのつながりを名指しする <code>why_now</code>、実際に走る <code>verify</code> <span class="nb">コマンド</span>、自分の手で完結できるか、どの<span class="nb">ファイル</span>を書くか、由来（<code>directed</code> か <code>discovery</code> か）、そして発見なら、引用した信号。この構造があるから、次の層である<span class="nb">ゲート</span>は、文章を信じる代わりに機械的に確認できます。
+        </p>
+      </div>
+    </div>
+
+    <div data-reveal>
+      <p class="lead lang-en">
+        So: can an agent find its own next task? Yes — but only work it can point at in the
+        logs, and only after it has tried and failed to decompose the alternative.
+        Recognition is grounded in what's observed, not in what sounds plausible.
+      </p>
+      <p class="lead lang-ja" lang="ja">
+        では、<span class="nb">エージェント</span>は自分で次の一手を見つけられるのか。見つけられます——ただし、<span class="nb">ログ</span>の中に指し示せる仕事だけ。そして、代わりの分解を試して失敗したあとだけ。認識は、それらしく聞こえるものではなく、観測されたものに基づいています。
+      </p>
+    </div>
+  </section>
+
+  <!-- 05: THE ONE VERIFIED METRIC -->
+  <section id="s05" aria-labelledby="h05-en">
+    <div class="section-inner" data-reveal>
+      <p class="section-label mono lang-en">05 &middot; The One Verified Metric</p>
+      <p class="section-label mono lang-ja" lang="ja">05 &middot; 唯一の実測値</p>
+      <div class="divider"></div>
+      <h2 id="h05-en" class="lang-en">One number, first measurement</h2>
+      <h2 id="h05-ja" class="lang-ja" lang="ja">たった1つの数字、初めての計測</h2>
     </div>
 
     <div class="card kpi-card" data-reveal>
@@ -1100,14 +1202,14 @@
     </div>
   </section>
 
-  <!-- 05: WHAT I THREW AWAY -->
-  <section id="s05" aria-labelledby="h05-en">
+  <!-- 06: WHAT I THREW AWAY -->
+  <section id="s06" aria-labelledby="h06-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono lang-en">05 &middot; What I Threw Away</p>
-      <p class="section-label mono lang-ja" lang="ja">05 &middot; 捨てたもの</p>
+      <p class="section-label mono lang-en">06 &middot; What I Threw Away</p>
+      <p class="section-label mono lang-ja" lang="ja">06 &middot; 捨てたもの</p>
       <div class="divider"></div>
-      <h2 id="h05-en" class="lang-en">The first diagnosis was wrong</h2>
-      <h2 id="h05-ja" class="lang-ja" lang="ja">最初の診断は間違っていた</h2>
+      <h2 id="h06-en" class="lang-en">The first diagnosis was wrong</h2>
+      <h2 id="h06-ja" class="lang-ja" lang="ja">最初の診断は間違っていた</h2>
     </div>
 
     <div class="card thrown-card prose" data-reveal>
@@ -1146,14 +1248,14 @@
     </div>
   </section>
 
-  <!-- 06: THE CLOSING IRONY -->
-  <section id="s06" aria-labelledby="h06-en">
+  <!-- 07: THE CLOSING IRONY -->
+  <section id="s07" aria-labelledby="h07-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono lang-en">06 &middot; The Closing Irony</p>
-      <p class="section-label mono lang-ja" lang="ja">06 &middot; 締めの皮肉</p>
+      <p class="section-label mono lang-en">07 &middot; The Closing Irony</p>
+      <p class="section-label mono lang-ja" lang="ja">07 &middot; 締めの皮肉</p>
       <div class="divider"></div>
-      <h2 id="h06-en" class="lang-en">The gate that couldn't explain itself</h2>
-      <h2 id="h06-ja" class="lang-ja" lang="ja">自分を説明できなかった<span class="nb">ゲート</span></h2>
+      <h2 id="h07-en" class="lang-en">The gate that couldn't explain itself</h2>
+      <h2 id="h07-ja" class="lang-ja" lang="ja">自分を説明できなかった<span class="nb">ゲート</span></h2>
     </div>
 
     <div class="irony-card" data-reveal>
@@ -1222,14 +1324,14 @@
     </div>
   </section>
 
-  <!-- 07: TRANSFERABLE RULES -->
-  <section id="s07" aria-labelledby="h07-en">
+  <!-- 08: TRANSFERABLE RULES -->
+  <section id="s08" aria-labelledby="h08-en">
     <div class="section-inner" data-reveal>
-      <p class="section-label mono lang-en">07 &middot; Transferable Rules</p>
-      <p class="section-label mono lang-ja" lang="ja">07 &middot; 持ち帰れる<span class="nb">ルール</span></p>
+      <p class="section-label mono lang-en">08 &middot; Transferable Rules</p>
+      <p class="section-label mono lang-ja" lang="ja">08 &middot; 持ち帰れる<span class="nb">ルール</span></p>
       <div class="divider"></div>
-      <h2 id="h07-en" class="lang-en">What generalizes</h2>
-      <h2 id="h07-ja" class="lang-ja" lang="ja">一般化できること</h2>
+      <h2 id="h08-en" class="lang-en">What generalizes</h2>
+      <h2 id="h08-ja" class="lang-ja" lang="ja">一般化できること</h2>
     </div>
 
     <div class="rules-list" data-reveal-stagger>
@@ -1322,7 +1424,7 @@
   var langToggle = document.getElementById('lang-toggle');
   var TITLE_EN = document.title;
   var TITLE_JA = '機械でチェックする、自律エージェント・ループのゲート';
-  var SECTION_NUMS = ['00', '01', '02', '03', '04', '05', '06', '07'];
+  var SECTION_NUMS = ['00', '01', '02', '03', '04', '05', '06', '07', '08'];
 
   function syncSectionLabelledby(lang) {
     SECTION_NUMS.forEach(function (num) {
