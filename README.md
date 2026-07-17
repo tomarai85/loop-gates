@@ -22,6 +22,39 @@ These four recur across roughly 15 recorded corrections. Ordered worst-first.
 
 What the gate actually checks — and everything built around it — is the architecture below.
 
+## The loop, as one turn
+
+Every cycle runs the same five stages. The gate sits in the middle: nothing executes without passing it, and nothing stops without its sanction.
+
+1. **Plan** — a fresh planner subagent writes `tasks.json` from the mission + live signals.
+2. **Gate** — each task passes 13 mechanical checks, or it's gated / stops.
+3. **Execute** — admitted tasks run as a parallel batch (claim, finish, abort).
+4. **Verify** — done tasks' verifiers are re-run later; "done" decays, drift is flagged.
+5. **Replan** — budget-bounded: a new planner is spawned and the turn repeats.
+
+The only legitimate way the loop ends: the gate admits zero tasks — and even that stop is refused unless a `no_regret` attempt is on record.
+
+## The gate, exactly
+
+The real admission sequence, in order. A task is admitted only if it clears all thirteen; the first one it fails decides where it goes. None of it is a judgment call — each row is a line of code.
+
+| # | The task is asked… | …or it goes to |
+|---|---|---|
+| 1 | Did a reviewer reject it with evidence? | gated |
+| 2 | Are its fields the right type — `verify` a string, not a list? | gated |
+| 3 | Does its `id` collide with a `done` record? | gated |
+| 4 | Does `why_now` link to the mission (≥10 chars)? | gated |
+| 5 | Is there a runnable `verify` (not "tbd"/"manual")? | gated |
+| 6 | Is that verifier non-vacuous — not `true` or a bare `echo`? | gated |
+| 7 | Is it self-doable without a human? | Tom's queue |
+| 8 | Is it free of stop/danger keywords? | Tom's verdict |
+| 9 | Is it real work, not polish untied to a blocking gap? | gated |
+| 10 | Discovery task? Then it must cite a live signal (≥20 chars). | gated |
+| 11 | Discovery cap: is it the only open exploratory task? | gated |
+| 12 | If `branch_independent`, does it name what it's independent of? | gated |
+| 13 | Is its lane free — not owned by another session? | reclassify |
+| ✓ | all thirteen clear | **ADMIT** |
+
 ## Architecture: seven layers, one gate at the center
 
 Each layer was added because a failure class above found the gap in the layer before it.
