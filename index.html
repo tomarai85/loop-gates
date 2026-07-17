@@ -1154,15 +1154,16 @@
           <h3 class="lang-ja" lang="ja">提案<span class="nb">タスク</span>は、一文ではなく1件の記録</h3>
         </div>
         <p class="lang-en">
-          Each task the planner emits is structured: a title, a <code>why_now</code> that
-          names the mission link, a <code>verify</code> command that actually runs, whether
-          it's self-doable, which files it will write, its origin (<code>directed</code> or
-          <code>discovery</code>), and — for <code>discovery</code> — the cited signal. That
-          structure is what lets the next layer, the gate, check it mechanically instead of
-          trusting prose.
+          Each task the planner emits is a structured record, not a sentence:
+          <code>title</code>, <code>why_now</code> (the mission link), <code>verify</code>
+          (a command that actually runs), <code>self_doable</code>, <code>mutates</code>
+          (the files it will write), <code>origin</code> (<code>directed</code> or
+          <code>discovery</code>), and — for discovery — <code>signal</code>, the cited
+          evidence. That structure is what lets the next layer, the gate, check it
+          mechanically instead of trusting prose.
         </p>
         <p class="lang-ja" lang="ja">
-          計画役が出す<span class="nb">タスク</span>は、どれも構造を持っています。<span class="nb">タイトル</span>、<span class="nb">ミッション</span>とのつながりを名指しする <code>why_now</code>、実際に走る <code>verify</code> <span class="nb">コマンド</span>、自分の手で完結できるか、どの<span class="nb">ファイル</span>を書くか、由来（<code>directed</code> か <code>discovery</code> か）、そして発見なら、引用した信号。この構造があるから、次の層である<span class="nb">ゲート</span>は、文章を信じる代わりに機械的に確認できます。
+          計画役が出す<span class="nb">タスク</span>は、一文ではなく1件の構造化された記録です。<code>title</code>、<code>why_now</code>（<span class="nb">ミッション</span>とのつながり）、<code>verify</code>（実際に走る<span class="nb">コマンド</span>）、<code>self_doable</code>、<code>mutates</code>（書き込む<span class="nb">ファイル</span>）、<code>origin</code>（<code>directed</code> か <code>discovery</code> か）、そして発見なら <code>signal</code>（引用した信号）。この構造があるから、次の層である<span class="nb">ゲート</span>は、文章を信じる代わりに機械的に確認できます。
         </p>
       </div>
     </div>
