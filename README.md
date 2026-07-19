@@ -10,7 +10,7 @@ Every failure class below was already forbidden in prose — in the prompt, in `
 
 These four recur across roughly 15 recorded corrections. Ordered worst-first.
 
-1. **Parking (most frequent)** — stalling on reversible, already-authorized work while declaring "awaiting your judgment."
+1. **Parking (most frequent)** — stalling on reversible, already-authorized work while declaring "awaiting your judgment." Measured at **14% of 1,258 real stops** (see the metric below).
 2. **Misdiagnosing** — blaming context length for API and rate-limit errors. The real cause was request-volume throttling, recorded across four separate memos.
 3. **Idling** — sleeping long between cycles with nothing to actually wait for.
 4. **Overreaching** — welding custom autonomy machinery onto a native command that was already mine, built-in, and didn't need it.
@@ -108,9 +108,13 @@ So: can an agent find its own next task? Yes — but only work it can point at i
 
 ## The one verified metric
 
-North star: **survived work per million tokens**. First measurement: **2.68**.
+For a long time the north star was a lonely ratio — survived work per million tokens, first measured at 2.68, with nothing to compare it to. Then I built the thing that had been missing: a corpus. Nine weeks of transcripts mined mechanically into **1,258 real stops**, each labelled from the record alone.
 
-Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
+- **14%** of those stops (183) resumed work with **no human input** — a park, not a real block. That is the loop's core failure, finally measured instead of felt. It is a lower bound: a park that I happened to answer is counted as legitimate.
+- Of the 183, **72** were caught by a gate; **111** the model abandoned on its own once it kept going.
+- Where a gate *did* block a stop, **280 of 285 (98%)** were followed by real work within a **median of 45 seconds**. The block became work, not a wasted turn.
+
+The same corpus humbled me. Two independent reviews called a mechanical capability cross-check — *does the session's own record show it already did the thing it claims it cannot?* — the highest-leverage fix. Scored against the 1,258 stops it contradicted **1%** of the parks at a **0% false-deny** rate: safe, and nearly useless here. Most real parks don't claim an inability a machine can check; they claim a judgement call. Without the corpus I would have shipped that fix believing it was the answer.
 
 ## What I threw away
 
@@ -146,6 +150,7 @@ Correct fix: a wrong-typed field gets gated, with a message naming the fix — n
 4. Re-run old verifiers. "Done" decays.
 5. Watch for edits to the check itself.
 6. When hardening a gate, prefer failing closed to a coercion that silently passes.
+7. Correctness is not legibility. A loop can pass every gate and still lose the human who owns it. The moment its work shifts from what they asked for to hardening it generated itself, surface that once — running forever is not permission to run opaquely.
 
 ---
 

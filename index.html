@@ -1499,14 +1499,23 @@
     </div>
 
     <div class="card kpi-card" data-reveal>
-      <div class="kpi-num mono" data-count-to="2.68">2.68</div>
-      <div class="kpi-label lang-en">survived work / 1M tokens</div>
-      <div class="kpi-label lang-ja" lang="ja">生存した仕事 / 100万<span class="nb">トークン</span></div>
+      <div class="kpi-num mono" data-count-to="14" data-count-decimals="0" data-count-suffix="%">14%</div>
+      <div class="kpi-label lang-en">of 1,258 real stops were not human blocks</div>
+      <div class="kpi-label lang-ja" lang="ja">実測した1,258件の停止のうち、本物の人間待ちでなかった割合</div>
       <p class="kpi-caption lang-en">
-        Not a benchmark, nothing to compare it to — I finally had a number instead of a feeling.
+        Nine weeks of transcripts, mined mechanically: 1,258 real stops, and 183 of them (14%) resumed work with no human input — a park, not a block. 72 were caught by a gate; 111 the model abandoned on its own. And where a gate did block a stop, 280 of 285 (98%) turned into real work within a median of 45 seconds. The rate was a feeling before; now it is measured.
       </p>
       <p class="kpi-caption lang-ja" lang="ja">
-        <span class="nb">ベンチマーク</span>ではなく、比べる相手もいません。ようやく、感覚の代わりになる数字を1つ持てた、というだけです。
+        9週間分の記録を機械的に採掘: 実際の停止は1,258件、うち183件（14%）が人間の入力なしに作業を再開——<span class="nb">ブロック</span>ではなく<span class="nb">パーク</span>でした。72件は<span class="nb">ゲート</span>が捕まえ、111件は<span class="nb">モデル</span>が自分で撤回。<span class="nb">ゲート</span>が停止を止めた場面では、285件中280件（98%）が中央値45秒で実作業に変わっています。以前は感覚だった値が、いまは実測です。
+      </p>
+    </div>
+
+    <div class="card prose" data-reveal>
+      <p class="lang-en">
+        The same measurement humbled me. Two independent reviews called one fix the highest-leverage move: a mechanical capability cross-check — does the session's own record show it already did the thing it now claims it cannot? Scored against the 1,258 real stops, it contradicted 1% of the parks at a 0% false-deny rate: safe, and almost useless here. Most real parks don't claim an inability a machine can check; they claim a judgement call. Without the corpus I would have shipped it believing it was the answer.
+      </p>
+      <p class="lang-ja" lang="ja">
+        同じ計測は、私自身を打ちのめしもしました。独立した2つの<span class="nb">レビュー</span>が、ある修正を「最高<span class="nb">レバレッジ</span>」と結論づけたのです——機械的な能力照合、つまり「できない」と主張した当のことを、その<span class="nb">セッション</span>の記録が既に実行していないか照らし合わせる仕組みです。1,258件の実停止に当てて採点すると、<span class="nb">パーク</span>を反証できたのは1%、誤った否定は0%。安全ではあるが、ここではほぼ無力でした。実際の<span class="nb">パーク</span>の多くは、機械が照合できる「能力の欠如」ではなく「判断の要否」を主張するからです。<span class="nb">コーパス</span>がなければ、私はそれを答えだと信じて出荷していたはずです。
       </p>
     </div>
   </section>
@@ -1674,6 +1683,11 @@
         <p class="lang-en">When hardening a gate, prefer failing closed to a coercion that silently passes.</p>
         <p class="lang-ja" lang="ja"><span class="nb">ゲート</span>を硬くするときは、こっそり通す変換よりも、落ちる（安全側）を選ぶ。</p>
       </div>
+      <div class="card rule-item">
+        <span class="rule-num mono">07</span>
+        <p class="lang-en">Correctness is not legibility. A loop can pass every gate and still lose the human who owns it. The moment its work shifts from what they asked for to hardening it generated itself, surface that once. Running forever is not permission to run opaquely.</p>
+        <p class="lang-ja" lang="ja">正しさと可読性は別物。<span class="nb">ループ</span>は全<span class="nb">ゲート</span>を通してなお、それを託した人間を見失える。作業が「頼まれたこと」から「自分で生み出した堅牢化」へ移った瞬間、それを一度だけ見せる。永遠に走る許可は、不透明に走る許可ではありません。</p>
+      </div>
     </div>
   </section>
 
@@ -1815,32 +1829,37 @@
     });
   }
 
-  /* ---- Count-up on the 2.68 metric: static value already in markup; this only animates the presentation ---- */
-  var countEl = document.querySelector('[data-count-to]');
-  if (countEl && !prefersReducedMotion && 'IntersectionObserver' in window) {
+  /* ---- Count-up on the headline metric: the final value is already in the markup, so no-JS and
+     reduced-motion readers see the correct number; this only animates the presentation. Honours
+     data-count-decimals (default 2) and data-count-suffix (default ''). ---- */
+  var countEls = document.querySelectorAll('[data-count-to]');
+  if (countEls.length && !prefersReducedMotion && 'IntersectionObserver' in window) {
     var countIO = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         if (!entry.isIntersecting) return;
         countIO.unobserve(entry.target);
         var target = parseFloat(entry.target.getAttribute('data-count-to'));
         if (isNaN(target)) return;
+        var decAttr = entry.target.getAttribute('data-count-decimals');
+        var dec = decAttr === null ? 2 : parseInt(decAttr, 10);
+        var suffix = entry.target.getAttribute('data-count-suffix') || '';
         var start = null;
         var duration = 1400;
         function step(ts) {
           if (start === null) start = ts;
           var t = Math.min(1, (ts - start) / duration);
           var eased = 1 - Math.pow(1 - t, 3);
-          entry.target.textContent = (target * eased).toFixed(2);
+          entry.target.textContent = (target * eased).toFixed(dec) + suffix;
           if (t < 1) {
             requestAnimationFrame(step);
           } else {
-            entry.target.textContent = target.toFixed(2);
+            entry.target.textContent = target.toFixed(dec) + suffix;
           }
         }
         requestAnimationFrame(step);
       });
     }, { threshold: 0.5 });
-    countIO.observe(countEl);
+    countEls.forEach(function (el) { countIO.observe(el); });
   }
 })();
 </script>
